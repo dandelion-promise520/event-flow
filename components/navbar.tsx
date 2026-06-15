@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { Calendar, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+import NotificationCenter from "./notification-center";
+
 export default function Navbar() {
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);
 
@@ -36,6 +38,7 @@ export default function Navbar() {
           </Link>
           {user ? (
             <>
+              <NotificationCenter />
               <Link href="/dashboard" className="text-sm font-medium text-neutral-600 hover:text-black">
                 控制台 ({user.name})
               </Link>
