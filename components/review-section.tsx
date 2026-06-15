@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Star, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,7 +30,7 @@ export default function ReviewSection({ eventId }: ReviewSectionProps) {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
       const res = await fetch(`/api/events/${eventId}/reviews`);
       const data = await res.json();
@@ -40,9 +40,9 @@ export default function ReviewSection({ eventId }: ReviewSectionProps) {
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [eventId]);
 
-  const checkReviewEligibility = async (userId: string) => {
+  const checkReviewEligibility = useCallback(async (userId: string) => {
     try {
       // 校验是否有已使用的门票
       const res = await fetch(`/api/tickets?userId=${userId}&eventId=${eventId}`);
@@ -53,24 +53,27 @@ export default function ReviewSection({ eventId }: ReviewSectionProps) {
           // 再检查是否已经发表过评论
           const reviewRes = await fetch(`/api/events/${eventId}/reviews`);
           const reviewsData = await reviewRes.json();
-          const alreadyReviewed = reviewsData.some((r: any) => r.userId === userId);
+          const alreadyReviewed = reviewsData.some((r: Review & { userId: string }) => r.userId === userId);
           setCanReview(!alreadyReviewed);
         }
       }
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [eventId]);
 
   useEffect(() => {
-    fetchReviews();
-    const stored = localStorage.getItem("campus_user");
-    if (stored) {
-      const u = JSON.parse(stored);
-      setUser(u);
-      checkReviewEligibility(u.id);
-    }
-  }, [eventId]);
+    const timer = setTimeout(() => {
+      fetchReviews();
+      const stored = localStorage.getItem("campus_user");
+      if (stored) {
+        const u = JSON.parse(stored);
+        setUser(u);
+        checkReviewEligibility(u.id);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [eventId, fetchReviews, checkReviewEligibility]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,7 +97,7 @@ export default function ReviewSection({ eventId }: ReviewSectionProps) {
       } else {
         setErrorMsg(data.message || "提交评价失败");
       }
-    } catch (err) {
+    } catch {
       setErrorMsg("服务器连接失败");
     }
   };

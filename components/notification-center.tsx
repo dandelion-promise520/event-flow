@@ -53,12 +53,17 @@ export default function NotificationCenter() {
     const stored = localStorage.getItem("campus_user");
     if (stored) {
       const u = JSON.parse(stored);
-      setUser(u);
-      fetchNotifications(u.id);
-      
-      // 轮询（每10秒自动更新一次通知列表）
-      const interval = setInterval(() => fetchNotifications(u.id), 10000);
-      return () => clearInterval(interval);
+      let interval: NodeJS.Timeout | undefined;
+      const timer = setTimeout(() => {
+        setUser(u);
+        fetchNotifications(u.id);
+        // 轮询（每10秒自动更新一次通知列表）
+        interval = setInterval(() => fetchNotifications(u.id), 10000);
+      }, 0);
+      return () => {
+        clearTimeout(timer);
+        if (interval) clearInterval(interval);
+      };
     }
   }, []);
 
