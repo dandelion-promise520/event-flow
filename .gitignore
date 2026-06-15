@@ -60,3 +60,5 @@ prisma/*.db-wal
 # Gemini
 GEMINI.md
 
+# Docs
+/docs/
