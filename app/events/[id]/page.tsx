@@ -3,6 +3,7 @@
 import { useEffect, useState, use, useCallback } from "react";
 import { MapPin, Calendar, ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -149,13 +150,16 @@ export default function EventDetail({ params }: PageProps) {
                   <span>预约成功</span>
                 </div>
               ) : (
-                <button
+                <Button
                   disabled={event.bookedCount >= event.capacity || booking}
                   onClick={handleBook}
-                  className="flex h-11 w-full items-center justify-center rounded-xl bg-black text-sm font-semibold text-white transition-all hover:bg-neutral-800 disabled:bg-neutral-200 disabled:text-neutral-400 shadow-sm"
+                  className="w-full h-11 font-semibold"
                 >
-                  {booking ? <Loader2 className="h-4 w-4 animate-spin" /> : "立即预订电子门票"}
-                </button>
+                  {booking ? (
+                    <Loader2 data-icon="inline-start" className="animate-spin" />
+                  ) : null}
+                  {booking ? "正在预订..." : "立即预订电子门票"}
+                </Button>
               )}
               {message && (
                 <p className={`text-xs ${success ? "text-emerald-600" : "text-red-500"} mt-2`}>

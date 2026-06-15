@@ -2,6 +2,24 @@
 
 import { useEffect, useState } from "react";
 import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { FieldGroup, Field, FieldLabel } from "@/components/ui/field";
+
+const categories = [
+  { label: "学术讲座", value: "学术讲座" },
+  { label: "文体比赛", value: "文体比赛" },
+  { label: "社团活动", value: "社团活动" },
+];
 
 interface User {
   id: string;
@@ -212,107 +230,124 @@ export default function Dashboard() {
         /* 主办方控制台 - 发布活动 & 核销门票 */
         <div className="mt-10 grid gap-10 lg:grid-cols-12">
           {/* 左侧：发布活动表单 & 扫码核销 */}
-          <div className="lg:col-span-5 space-y-8">
+          <div className="lg:col-span-5 flex flex-col gap-8">
             {/* 活动核销 */}
             <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
               <h2 className="text-base font-bold text-neutral-900">电子门票现场核销</h2>
-              <form onSubmit={handleCheckin} className="mt-4 flex gap-2">
-                <input
+              <form onSubmit={handleCheckin} className="mt-4 flex items-center gap-2">
+                <Input
                   type="text"
                   placeholder="输入门票代码 (e.g. EVT-...)"
                   value={ticketCodeInput}
                   onChange={(e) => setTicketCodeInput(e.target.value)}
                   required
-                  className="h-10 flex-1 rounded-xl border border-neutral-200 px-3 text-xs outline-none focus:border-neutral-400"
+                  className="h-10 flex-1 bg-white"
                 />
-                <button
+                <Button
                   type="submit"
-                  className="h-10 rounded-xl bg-black px-4 text-xs font-semibold text-white hover:bg-neutral-800"
+                  className="h-10 px-4 text-xs font-semibold"
                 >
                   一键核销
-                </button>
+                </Button>
               </form>
               {checkinMsg && <p className="mt-3 text-xs text-indigo-600 font-semibold">{checkinMsg}</p>}
             </div>
 
             {/* 创建活动 */}
             <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-              <h2 className="text-base font-bold text-neutral-900">发布全新活动</h2>
-              <form onSubmit={handleCreateEvent} className="mt-5 space-y-4">
-                <div>
-                  <label className="text-xs font-bold text-neutral-600">活动名称</label>
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                    className="mt-1.5 h-9 w-full rounded-xl border border-neutral-200 px-3 text-xs outline-none focus:border-neutral-400"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-neutral-600">活动分类</label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="mt-1.5 h-9 w-full rounded-xl border border-neutral-200 px-3 text-xs outline-none focus:border-neutral-400 bg-white"
-                  >
-                    <option value="学术讲座">学术讲座</option>
-                    <option value="文体比赛">文体比赛</option>
-                    <option value="社团活动">社团活动</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-neutral-600">活动描述</label>
-                  <textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    required
-                    rows={3}
-                    className="mt-1.5 w-full rounded-xl border border-neutral-200 p-3 text-xs outline-none focus:border-neutral-400"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs font-bold text-neutral-600">开始时间</label>
-                    <input
-                      type="datetime-local"
-                      value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
-                      required
-                      className="mt-1.5 h-9 w-full rounded-xl border border-neutral-200 px-3 text-xs outline-none focus:border-neutral-400"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-bold text-neutral-600">地点</label>
-                    <input
+              <h2 className="text-base font-bold text-neutral-900 mb-5">发布全新活动</h2>
+              <form onSubmit={handleCreateEvent}>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel>活动名称</FieldLabel>
+                    <Input
                       type="text"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
                       required
-                      className="mt-1.5 h-9 w-full rounded-xl border border-neutral-200 px-3 text-xs outline-none focus:border-neutral-400"
+                      className="bg-white"
                     />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs font-bold text-neutral-600">名额上限 (张)</label>
-                    <input
-                      type="number"
-                      value={capacity}
-                      onChange={(e) => setCapacity(e.target.value)}
+                  </Field>
+
+                  <Field>
+                    <FieldLabel>活动分类</FieldLabel>
+                    <Select
+                      value={category}
+                      onValueChange={(val) => setCategory(val || "")}
+                      items={categories}
+                    >
+                      <SelectTrigger className="w-full bg-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {categories.map((cat) => (
+                            <SelectItem key={cat.value} value={cat.value}>
+                              {cat.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+
+                  <Field>
+                    <FieldLabel>活动描述</FieldLabel>
+                    <Textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
                       required
-                      className="mt-1.5 h-9 w-full rounded-xl border border-neutral-200 px-3 text-xs outline-none focus:border-neutral-400"
+                      rows={3}
+                      className="bg-white"
                     />
+                  </Field>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <Field>
+                      <FieldLabel>开始时间</FieldLabel>
+                      <Input
+                        type="datetime-local"
+                        value={startTime}
+                        onChange={(e) => setStartTime(e.target.value)}
+                        required
+                        className="bg-white"
+                      />
+                    </Field>
+                    <Field>
+                      <FieldLabel>地点</FieldLabel>
+                      <Input
+                        type="text"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        required
+                        className="bg-white"
+                      />
+                    </Field>
                   </div>
-                </div>
-                {eventMsg && <p className="text-xs text-indigo-600 font-semibold">{eventMsg}</p>}
-                <button
-                  type="submit"
-                  className="flex h-10 w-full items-center justify-center gap-1 rounded-xl bg-black text-xs font-semibold text-white hover:bg-neutral-800"
-                >
-                  <Plus className="h-4 w-4" />
-                  确认发布活动
-                </button>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <Field>
+                      <FieldLabel>名额上限 (张)</FieldLabel>
+                      <Input
+                        type="number"
+                        value={capacity}
+                        onChange={(e) => setCapacity(e.target.value)}
+                        required
+                        className="bg-white"
+                      />
+                    </Field>
+                  </div>
+
+                  {eventMsg && <p className="text-xs text-indigo-600 font-semibold">{eventMsg}</p>}
+
+                  <Button
+                    type="submit"
+                    className="w-full h-10 font-semibold"
+                  >
+                    <Plus data-icon="inline-start" />
+                    确认发布活动
+                  </Button>
+                </FieldGroup>
               </form>
             </div>
           </div>
@@ -329,12 +364,14 @@ export default function Dashboard() {
                       地点: {evt.location} | 容量: {evt.capacity} 人 | 已售: {evt.bookedCount} 张
                     </p>
                   </div>
-                  <button
+                  <Button
+                    variant="outline"
+                    size="icon"
                     onClick={() => handleDeleteEvent(evt.id)}
-                    className="p-2 rounded-lg border border-neutral-200 hover:border-red-200 text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                    className="hover:border-red-200 text-neutral-400 hover:text-red-600 hover:bg-red-50"
                   >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                    <Trash2 />
+                  </Button>
                 </div>
               ))}
               {createdEvents.length === 0 && (

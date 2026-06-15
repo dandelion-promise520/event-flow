@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { FieldGroup, Field, FieldLabel } from "@/components/ui/field";
 
 export default function Login() {
   const [email, setEmail] = useState<string>("student@campus.com");
@@ -42,38 +45,43 @@ export default function Login() {
           请输入您的学生账号或主办方账号
         </p>
 
-        <form onSubmit={handleLogin} className="mt-8 space-y-4">
-          <div>
-            <label className="text-xs font-semibold text-neutral-700">账号 (邮箱)</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="mt-1.5 h-10 w-full rounded-xl border border-neutral-200 px-3.5 text-sm outline-none transition-all focus:border-neutral-400"
-            />
-          </div>
+        <form onSubmit={handleLogin} className="mt-8">
+          <FieldGroup>
+            <Field>
+              <FieldLabel>账号 (邮箱)</FieldLabel>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="bg-white"
+              />
+            </Field>
 
-          <div>
-            <label className="text-xs font-semibold text-neutral-700">登录密码</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="mt-1.5 h-10 w-full rounded-xl border border-neutral-200 px-3.5 text-sm outline-none transition-all focus:border-neutral-400"
-            />
-          </div>
+            <Field>
+              <FieldLabel>登录密码</FieldLabel>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="bg-white"
+              />
+            </Field>
 
-          {message && <p className="text-xs text-red-500">{message}</p>}
+            {message && <p className="text-xs text-red-500">{message}</p>}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex h-10 w-full items-center justify-center rounded-xl bg-black text-sm font-semibold text-white transition-all hover:bg-neutral-800 shadow-sm"
-          >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "立即登录"}
-          </button>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full h-10 font-semibold"
+            >
+              {loading ? (
+                <Loader2 data-icon="inline-start" className="animate-spin" />
+              ) : null}
+              {loading ? "正在登录..." : "立即登录"}
+            </Button>
+          </FieldGroup>
         </form>
 
         <div className="mt-6 border-t border-neutral-100 pt-6 text-center text-xs text-neutral-400">

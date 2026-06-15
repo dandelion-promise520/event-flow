@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Calendar, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);
@@ -38,21 +39,19 @@ export default function Navbar() {
               <Link href="/dashboard" className="text-sm font-medium text-neutral-600 hover:text-black">
                 控制台 ({user.name})
               </Link>
-              <button
+              <Button
+                variant="ghost"
                 onClick={handleLogout}
-                className="flex items-center gap-1.5 text-sm font-medium text-red-600 hover:text-red-800"
+                className="flex items-center gap-1.5 text-sm font-medium text-red-600 hover:text-red-800 hover:bg-red-50/50"
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut data-icon="inline-start" />
                 退出
-              </button>
+              </Button>
             </>
           ) : (
-            <Link
-              href="/login"
-              className="inline-flex h-9 items-center justify-center rounded-lg bg-black px-4 text-sm font-medium text-white transition-all hover:bg-neutral-800"
-            >
+            <Button render={<Link href="/login" />} nativeButton={false}>
               登录系统
-            </Link>
+            </Button>
           )}
         </nav>
       </div>

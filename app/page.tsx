@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback } from "react"
 import EventCard, { EventItem } from "@/components/event-card"
 import { Search, Sparkles } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 export default function Home() {
   const [events, setEvents] = useState<EventItem[]>([])
@@ -48,7 +50,7 @@ export default function Home() {
         {/* Search Bar */}
         <div className="relative mx-auto mt-8 flex max-w-md items-center">
           <Search className="absolute left-3.5 h-4 w-4 text-neutral-400" />
-          <input
+          <Input
             type="text"
             placeholder="搜索感兴趣的活动..."
             value={keyword}
@@ -61,17 +63,14 @@ export default function Home() {
       {/* Category Filter */}
       <div className="mt-12 flex flex-wrap items-center justify-center gap-2.5">
         {["", "学术讲座", "文体比赛", "社团活动"].map((cat) => (
-          <button
+          <Button
             key={cat}
             onClick={() => setSelectedCategory(cat)}
-            className={`h-9 rounded-xl px-4 text-sm font-semibold transition-all ${
-              selectedCategory === cat
-                ? "bg-black text-white"
-                : "border border-neutral-200 bg-neutral-50 text-neutral-600 hover:border-neutral-300 hover:text-black"
-            }`}
+            variant={selectedCategory === cat ? "default" : "outline"}
+            className="h-9 rounded-xl px-4 text-sm font-semibold"
           >
             {cat || "全部活动"}
-          </button>
+          </Button>
         ))}
       </div>
 

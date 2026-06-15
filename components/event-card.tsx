@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { MapPin, Calendar, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export interface EventItem {
   id: string;
@@ -78,12 +79,14 @@ export default function EventCard({ event }: EventProps) {
           </div>
         </div>
 
-        <Link
-          href={`/events/${event.id}`}
-          className="mt-5 inline-flex h-9 items-center justify-center rounded-xl bg-neutral-50 border border-neutral-200 text-xs font-semibold text-neutral-700 transition-colors hover:bg-neutral-100 hover:text-black"
+        <Button
+          render={<Link href={`/events/${event.id}`} />}
+          variant="outline"
+          nativeButton={false}
+          className="mt-5 text-xs font-semibold w-full"
         >
           查看详情与预订
-        </Link>
+        </Button>
       </div>
     </div>
   );
