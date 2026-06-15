@@ -10,6 +10,7 @@ interface PageProps {
 }
 
 import { EventItem } from "@/components/event-card";
+import ReviewSection from "@/components/review-section";
 
 export default function EventDetail({ params }: PageProps) {
   const resolvedParams = use(params);
@@ -170,6 +171,8 @@ export default function EventDetail({ params }: PageProps) {
           </div>
         </div>
       </div>
+
+      <ReviewSection eventId={id} />
     </div>
   );
 }
