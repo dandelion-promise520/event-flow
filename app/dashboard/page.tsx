@@ -89,6 +89,43 @@ export default function Dashboard() {
     : "";
   const endTime = startTime;
 
+  // 校验所选日期时间合法性并在选择时立刻提示
+  const validateTime = (date: Date | undefined, hour: string, minute: string) => {
+    if (!date) {
+      setEventMsg((prev) => (prev === "活动开始时间不能早于当前时间" || prev === "请选择活动开始日期" ? "" : prev));
+      return;
+    }
+    const tempStartTime = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}T${hour}:${minute}`;
+    const selectedDateTime = new Date(tempStartTime);
+    if (selectedDateTime.getTime() - Date.now() < -60 * 1000) {
+      setEventMsg("活动开始时间不能早于当前时间");
+    } else {
+      setEventMsg((prev) => {
+        if (prev === "活动开始时间不能早于当前时间" || prev === "请选择活动开始日期") {
+          return "";
+        }
+        return prev;
+      });
+    }
+  };
+
+  const handleDateSelect = (date: Date | undefined) => {
+    setSelectedDate(date);
+    validateTime(date, selectedHour, selectedMinute);
+  };
+
+  const handleHourChange = (hour: string | null) => {
+    const h = hour || "00";
+    setSelectedHour(h);
+    validateTime(selectedDate, h, selectedMinute);
+  };
+
+  const handleMinuteChange = (minute: string | null) => {
+    const m = minute || "00";
+    setSelectedMinute(m);
+    validateTime(selectedDate, selectedHour, m);
+  };
+
   // 门票核销码状态
   const [ticketCodeInput, setTicketCodeInput] = useState("");
   const [checkinMsg, setCheckinMsg] = useState<{ text: string; type: "success" | "error" } | null>(null);
@@ -491,8 +528,9 @@ export default function Dashboard() {
                           <Calendar
                             mode="single"
                             selected={selectedDate}
-                            onSelect={setSelectedDate}
+                            onSelect={handleDateSelect}
                             locale={zhCN}
+                            disabled={{ before: new Date(new Date().setHours(0, 0, 0, 0)) }}
                           />
                         </PopoverContent>
                       </Popover>
@@ -500,7 +538,7 @@ export default function Dashboard() {
                     <Field>
                       <FieldLabel>具体时间</FieldLabel>
                       <div className="flex gap-2 items-center">
-                        <Select value={selectedHour} onValueChange={(val) => setSelectedHour(val || "00")}>
+                        <Select value={selectedHour} onValueChange={handleHourChange}>
                           <SelectTrigger className="h-8 text-xs bg-white w-20">
                             <SelectValue placeholder="时" />
                           </SelectTrigger>
@@ -515,7 +553,7 @@ export default function Dashboard() {
                           </SelectContent>
                         </Select>
                         <span className="text-neutral-400 text-xs">:</span>
-                        <Select value={selectedMinute} onValueChange={(val) => setSelectedMinute(val || "00")}>
+                        <Select value={selectedMinute} onValueChange={handleMinuteChange}>
                           <SelectTrigger className="h-8 text-xs bg-white w-20">
                             <SelectValue placeholder="分" />
                           </SelectTrigger>
@@ -556,11 +594,19 @@ export default function Dashboard() {
                     </Field>
                   </div>
 
-                  {eventMsg && <p className="text-xs text-neutral-900 font-semibold">{eventMsg}</p>}
+                  {eventMsg && (
+                    <p className={cn(
+                      "text-xs font-semibold",
+                      eventMsg.includes("成功") ? "text-emerald-600" : "text-rose-600"
+                    )}>
+                      {eventMsg}
+                    </p>
+                  )}
 
                   <Button
                     type="submit"
-                    className="w-full h-10 font-semibold"
+                    className="w-full h-10 font-semibold cursor-pointer"
+                    disabled={eventMsg === "活动开始时间不能早于当前时间" || !selectedDate}
                   >
                     <Plus data-icon="inline-start" />
                     确认发布活动
