@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Trash2, Megaphone, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -36,6 +36,8 @@ interface EventType {
   startTime: string;
   capacity?: number;
   bookedCount?: number;
+  soldCount?: number;
+  checkedInCount?: number;
 }
 
 interface TicketType {
@@ -43,6 +45,17 @@ interface TicketType {
   status: string;
   ticketCode: string;
   event: EventType;
+}
+
+interface DashboardTicketType {
+  id: string;
+  ticketCode: string;
+  eventTitle: string;
+  userName: string;
+  userEmail: string;
+  status: string;
+  bookedAt: string;
+  updatedAt: string;
 }
 
 export default function Dashboard() {
@@ -65,6 +78,20 @@ export default function Dashboard() {
   const [ticketCodeInput, setTicketCodeInput] = useState("");
   const [checkinMsg, setCheckinMsg] = useState("");
 
+  // 看板与 Tab/明细状态
+  const [activeTab, setActiveTab] = useState<"events" | "tickets">("events");
+  const [dashboardTickets, setDashboardTickets] = useState<DashboardTicketType[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [eventFilter, setEventFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  // 广播通知表单状态
+  const [broadcastEventId, setBroadcastEventId] = useState<string | null>(null);
+  const [broadcastTitle, setBroadcastTitle] = useState("");
+  const [broadcastContent, setBroadcastContent] = useState("");
+  const [broadcastMsg, setBroadcastMsg] = useState("");
+  const [broadcastLoading, setBroadcastLoading] = useState(false);
+
   const loadDashboardData = async (currUser: User) => {
     try {
       if (currUser.role === "USER") {
@@ -72,15 +99,98 @@ export default function Dashboard() {
         const data = await res.json();
         setTickets(data);
       } else {
-        // 主办方/管理员获取自己发布的活动
-        const res = await fetch(`/api/events?organizerId=${currUser.id}`);
+        // 主办方/管理员获取自己发布的活动和看板明细数据
+        const res = await fetch(`/api/events/dashboard?organizerId=${currUser.id}`);
         const data = await res.json();
-        setCreatedEvents(data);
+        if (data.events) {
+          const formatted = data.events.map((e: any) => ({
+            ...e,
+            bookedCount: e.soldCount,
+          }));
+          setCreatedEvents(formatted);
+        }
+        if (data.tickets) {
+          setDashboardTickets(data.tickets);
+        }
       }
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const filteredTickets = dashboardTickets.filter((t) => {
+    const matchSearch =
+      searchQuery.trim() === "" ||
+      t.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.userEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.ticketCode.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchEvent = eventFilter === "all" || t.eventTitle === eventFilter;
+    const matchStatus = statusFilter === "all" || t.status === statusFilter;
+
+    return matchSearch && matchEvent && matchStatus;
+  });
+
+  const handleExportCSV = () => {
+    const headers = ["门票编号", "活动名称", "购票人", "联系邮箱", "当前状态", "订票时间"];
+    const rows = filteredTickets.map((t) => [
+      t.ticketCode,
+      t.eventTitle,
+      t.userName,
+      t.userEmail,
+      t.status === "USED" ? "已核销" : t.status === "UNUSED" ? "未使用" : "已取消",
+      new Date(t.bookedAt).toLocaleString("zh-CN"),
+    ]);
+
+    const csvContent =
+      "\uFEFF" + // 添加 UTF-8 BOM，防止 Excel 打开乱码
+      [headers.join(","), ...rows.map((e) => e.map((val) => `"${(val || "").replace(/"/g, '""')}"`).join(","))].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `event_tickets_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleSendBroadcast = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!broadcastEventId || !user) return;
+    setBroadcastLoading(true);
+    setBroadcastMsg("");
+    try {
+      const res = await fetch(`/api/events/${broadcastEventId}/broadcast`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          organizerId: user.id,
+          title: broadcastTitle,
+          content: broadcastContent,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setBroadcastMsg("广播消息已成功群发给所有购票者！");
+        setBroadcastContent("");
+        setTimeout(() => {
+          setBroadcastEventId(null);
+          setBroadcastTitle("");
+          setBroadcastContent("");
+          setBroadcastMsg("");
+        }, 1500);
+      } else {
+        setBroadcastMsg(data.message || "群发广播失败");
+      }
+    } catch {
+      setBroadcastMsg("广播接口故障");
+    } finally {
+      setBroadcastLoading(false);
     }
   };
 
@@ -352,32 +462,250 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* 右侧：我发布的活动列表 */}
-          <div className="lg:col-span-7 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-            <h2 className="text-base font-bold text-neutral-900">我发布的活动管理</h2>
-            <div className="mt-6 divide-y divide-neutral-100">
-              {createdEvents.map((evt) => (
-                <div key={evt.id} className="py-4 flex justify-between items-center first:pt-0 last:pb-0">
-                  <div>
-                    <h3 className="text-sm font-bold text-neutral-800">{evt.title}</h3>
-                    <p className="text-[11px] text-neutral-400 mt-1">
-                      地点: {evt.location} | 容量: {evt.capacity} 人 | 已售: {evt.bookedCount} 张
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleDeleteEvent(evt.id)}
-                    className="hover:border-red-200 text-neutral-400 hover:text-red-600 hover:bg-red-50"
-                  >
-                    <Trash2 />
-                  </Button>
+          {/* 右侧：选项卡面板 */}
+          <div className="lg:col-span-7 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm flex flex-col min-h-[500px]">
+            {/* Tabs Header */}
+            <div className="flex border-b border-neutral-100 pb-3 gap-6">
+              <button
+                onClick={() => setActiveTab("events")}
+                className={`text-sm font-bold pb-2 relative transition-all ${
+                  activeTab === "events"
+                    ? "text-indigo-600"
+                    : "text-neutral-400 hover:text-neutral-600"
+                }`}
+              >
+                活动管理
+                {activeTab === "events" && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" />
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab("tickets")}
+                className={`text-sm font-bold pb-2 relative transition-all ${
+                  activeTab === "tickets"
+                    ? "text-indigo-600"
+                    : "text-neutral-400 hover:text-neutral-600"
+                }`}
+              >
+                门票核销明细表
+                {activeTab === "tickets" && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" />
+                )}
+              </button>
+            </div>
+
+            {/* Tab Contents */}
+            <div className="mt-4 flex-1">
+              {activeTab === "events" ? (
+                /* 活动管理列表 */
+                <div className="divide-y divide-neutral-100">
+                  {createdEvents.map((evt) => (
+                    <div key={evt.id} className="py-4 flex justify-between items-center first:pt-0 last:pb-0">
+                      <div>
+                        <h3 className="text-sm font-bold text-neutral-800">{evt.title}</h3>
+                        <p className="text-[11px] text-neutral-400 mt-1">
+                          地点: {evt.location} | 容量: {evt.capacity} 人 | 已售: {evt.bookedCount} 张 | 已核销: {evt.checkedInCount || 0} 张
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setBroadcastEventId(evt.id);
+                            setBroadcastTitle(`关于活动《${evt.title}》的通知`);
+                            setBroadcastContent("");
+                            setBroadcastMsg("");
+                          }}
+                          className="h-8 px-3 text-[11px] font-semibold text-indigo-600 border-indigo-200 hover:bg-indigo-50/50 flex items-center gap-1"
+                        >
+                          <Megaphone className="h-3 w-3" />
+                          群发消息
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleDeleteEvent(evt.id)}
+                          className="h-8 w-8 hover:border-red-200 text-neutral-400 hover:text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  {createdEvents.length === 0 && (
+                    <p className="py-8 text-center text-xs text-neutral-400">目前未发布任何活动</p>
+                  )}
                 </div>
-              ))}
-              {createdEvents.length === 0 && (
-                <p className="py-8 text-center text-xs text-neutral-400">目前未发布任何活动</p>
+              ) : (
+                /* 门票核销明细表 */
+                <div className="space-y-4">
+                  {/* 筛选与导出栏 */}
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-neutral-50/50 p-3 rounded-xl border border-neutral-100">
+                    <div className="flex flex-wrap gap-2 items-center">
+                      <Input
+                        type="text"
+                        placeholder="搜索购票人姓名/邮箱/票号"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="h-8 text-[11px] bg-white w-full sm:w-48"
+                      />
+                      <select
+                        value={eventFilter}
+                        onChange={(e) => setEventFilter(e.target.value)}
+                        className="h-8 text-[11px] rounded-lg border border-neutral-200 bg-white px-2.5 py-1 text-neutral-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      >
+                        <option value="all">所有活动</option>
+                        {Array.from(new Set(dashboardTickets.map((t) => t.eventTitle))).map((title) => (
+                          <option key={title} value={title}>
+                            {title}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="h-8 text-[11px] rounded-lg border border-neutral-200 bg-white px-2.5 py-1 text-neutral-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      >
+                        <option value="all">所有状态</option>
+                        <option value="UNUSED">未使用</option>
+                        <option value="USED">已核销</option>
+                        <option value="CANCELLED">已取消</option>
+                      </select>
+                    </div>
+                    
+                    <Button
+                      onClick={handleExportCSV}
+                      variant="outline"
+                      className="h-8 px-3 text-[11px] font-semibold flex items-center gap-1 border-neutral-300 text-neutral-700 hover:bg-neutral-50 w-fit self-end md:self-auto"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      导出 CSV 数据
+                    </Button>
+                  </div>
+
+                  {/* 门票明细数据表格 */}
+                  <div className="overflow-x-auto rounded-xl border border-neutral-200">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-neutral-50/70 text-[10px] font-bold uppercase tracking-wider text-neutral-500 border-b border-neutral-200">
+                          <th className="p-3">购票人</th>
+                          <th className="p-3">电子票号</th>
+                          <th className="p-3">活动名称</th>
+                          <th className="p-3">当前状态</th>
+                          <th className="p-3">订票时间</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-100 text-xs text-neutral-700">
+                        {filteredTickets.map((t) => (
+                          <tr key={t.id} className="hover:bg-neutral-50/30 transition-colors">
+                            <td className="p-3">
+                              <div className="font-bold text-neutral-800">{t.userName}</div>
+                              <div className="text-[10px] text-neutral-400 mt-0.5">{t.userEmail}</div>
+                            </td>
+                            <td className="p-3 font-mono text-neutral-600 select-all">{t.ticketCode}</td>
+                            <td className="p-3 max-w-[140px] truncate font-medium text-neutral-700" title={t.eventTitle}>
+                              {t.eventTitle}
+                            </td>
+                            <td className="p-3">
+                              <span
+                                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                                  t.status === "USED"
+                                    ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                                    : t.status === "UNUSED"
+                                    ? "bg-indigo-50 text-indigo-700 border border-indigo-100"
+                                    : "bg-red-50 text-red-700 border border-red-100"
+                                }`}
+                              >
+                                {t.status === "USED" ? "已核销" : t.status === "UNUSED" ? "未使用" : "已取消"}
+                              </span>
+                            </td>
+                            <td className="p-3 text-neutral-400 text-[10px]">
+                              {new Date(t.bookedAt).toLocaleString("zh-CN")}
+                            </td>
+                          </tr>
+                        ))}
+                        {filteredTickets.length === 0 && (
+                          <tr>
+                            <td colSpan={5} className="p-8 text-center text-neutral-400">
+                              暂无匹配的门票销售记录
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+      
+      {/* 广播弹窗 */}
+      {broadcastEventId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-6 shadow-xl animate-in fade-in zoom-in duration-200">
+            <h3 className="text-lg font-bold text-neutral-900">群发广播通知</h3>
+            <p className="mt-1 text-xs text-neutral-500">
+              向所有订购该活动门票的用户发送站内信通知。
+            </p>
+            
+            <form onSubmit={handleSendBroadcast} className="mt-4 space-y-4">
+              <div>
+                <label className="text-xs font-bold text-neutral-700">通知标题</label>
+                <Input
+                  type="text"
+                  placeholder="请输入通知标题，如：活动场地变更"
+                  value={broadcastTitle}
+                  onChange={(e) => setBroadcastTitle(e.target.value)}
+                  required
+                  className="mt-1 bg-white"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-neutral-700">通知内容</label>
+                <Textarea
+                  placeholder="请输入通知的详细内容..."
+                  value={broadcastContent}
+                  onChange={(e) => setBroadcastContent(e.target.value)}
+                  required
+                  rows={4}
+                  className="mt-1 bg-white"
+                />
+              </div>
+              
+              {broadcastMsg && (
+                <p className={`text-xs font-semibold ${broadcastMsg.includes("成功") ? "text-emerald-600" : "text-red-600"}`}>
+                  {broadcastMsg}
+                </p>
+              )}
+              
+              <div className="flex justify-end gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setBroadcastEventId(null);
+                    setBroadcastTitle("");
+                    setBroadcastContent("");
+                    setBroadcastMsg("");
+                  }}
+                  disabled={broadcastLoading}
+                  className="h-9 px-4 text-xs"
+                >
+                  取消
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={broadcastLoading}
+                  className="h-9 px-4 text-xs bg-indigo-600 hover:bg-indigo-700 text-white"
+                >
+                  {broadcastLoading ? "发送中..." : "确定发送"}
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
       )}

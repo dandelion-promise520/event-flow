@@ -33,6 +33,9 @@ export async function GET(req: Request) {
       title: e.title,
       capacity: e.capacity,
       price: e.price,
+      location: e.location,
+      category: e.category,
+      startTime: e.startTime.toISOString(),
       soldCount: e.tickets.length,
       checkedInCount: e.tickets.filter((t) => t.status === "USED").length,
     }));
@@ -53,6 +56,7 @@ export async function GET(req: Request) {
 
     const formattedTickets = tickets.map((t) => ({
       id: t.id,
+      ticketCode: t.ticketCode,
       eventTitle: t.event.title,
       userName: t.user.name,
       userEmail: t.user.email,
