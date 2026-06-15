@@ -42,6 +42,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, message: "必填参数缺失" }, { status: 400 });
     }
 
+    const start = new Date(startTime);
+    if (start.getTime() - Date.now() < -60 * 1000) {
+      return NextResponse.json({ success: false, message: "活动开始时间不能早于当前时间" }, { status: 400 });
+    }
+
     const event = await prisma.event.create({
       data: {
         title,

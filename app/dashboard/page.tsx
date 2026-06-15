@@ -226,6 +226,18 @@ export default function Dashboard() {
     e.preventDefault();
     if (!user) return;
     setEventMsg("");
+
+    if (!selectedDate) {
+      setEventMsg("请选择活动开始日期");
+      return;
+    }
+
+    const selectedDateTime = new Date(startTime);
+    if (selectedDateTime.getTime() - Date.now() < -60 * 1000) {
+      setEventMsg("活动开始时间不能早于当前时间");
+      return;
+    }
+
     try {
       const res = await fetch("/api/events", {
         method: "POST",
