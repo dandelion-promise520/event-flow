@@ -13,7 +13,7 @@ export async function POST(
       return NextResponse.json({ success: false, message: "参数缺失" }, { status: 400 });
     }
 
-    // 1. 验证活动所有者
+    // 1. 验证活动及发送者身份
     const event = await prisma.event.findUnique({
       where: { id: eventId },
     });
@@ -22,7 +22,15 @@ export async function POST(
       return NextResponse.json({ success: false, message: "未找到该活动" }, { status: 404 });
     }
 
-    if (event.organizerId !== organizerId) {
+    const sender = await prisma.user.findUnique({
+      where: { id: organizerId },
+    });
+
+    if (!sender) {
+      return NextResponse.json({ success: false, message: "发送者用户不存在" }, { status: 404 });
+    }
+
+    if (event.organizerId !== organizerId && sender.role !== "ADMIN") {
       return NextResponse.json({ success: false, message: "无权对非自己创建的活动发布广播" }, { status: 403 });
     }
 

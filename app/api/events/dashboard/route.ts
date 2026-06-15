@@ -19,9 +19,9 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: false, message: "无权访问此数据" }, { status: 403 });
     }
 
-    // 1. 获取该组织者名下的所有活动，并聚合售票与核销数据
+    // 1. 获取活动列表，如果是 ADMIN 则获取全部，否则获取该组织者名下的活动
     const events = await prisma.event.findMany({
-      where: { organizerId },
+      where: organizer.role === "ADMIN" ? {} : { organizerId },
       include: {
         tickets: true,
       },
@@ -40,9 +40,9 @@ export async function GET(req: Request) {
       checkedInCount: e.tickets.filter((t) => t.status === "USED").length,
     }));
 
-    // 2. 获取针对该组织者所有活动已售出的门票明细数据
+    // 2. 获取已售出的门票明细数据，如果是 ADMIN 则获取全部，否则获取针对该组织者活动的门票
     const tickets = await prisma.ticket.findMany({
-      where: {
+      where: organizer.role === "ADMIN" ? {} : {
         event: {
           organizerId,
         },
