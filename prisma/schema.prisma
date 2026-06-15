@@ -17,6 +17,8 @@ model User {
   updatedAt DateTime @updatedAt
   events    Event[]  @relation("CreatedEvents")
   tickets   Ticket[]
+  reviews   Review[]
+  notifications Notification[]
 }
 
 model Event {
@@ -36,6 +38,7 @@ model Event {
   organizerId String
   organizer   User     @relation("CreatedEvents", fields: [organizerId], references: [id], onDelete: Cascade)
   tickets     Ticket[]
+  reviews     Review[]
 }
 
 model Ticket {
@@ -48,4 +51,30 @@ model Ticket {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   eventId    String
   event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  rating    Int      // 1 至 5 评分
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

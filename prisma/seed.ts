@@ -311,6 +311,36 @@ async function main() {
   });
 
   console.log("种子门票数据创建成功!");
+
+  // 查找一个已核销的门票
+  const usedTicket = await prisma.ticket.findFirst({
+    where: { status: "USED" },
+    include: { event: true, user: true }
+  });
+
+  if (usedTicket) {
+    // 写入评价种子数据
+    await prisma.review.upsert({
+      where: { userId_eventId: { userId: usedTicket.userId, eventId: usedTicket.eventId } },
+      update: {},
+      create: {
+        rating: 5,
+        content: "非常好的活动，收获满满！",
+        userId: usedTicket.userId,
+        eventId: usedTicket.eventId
+      }
+    });
+
+    // 写入通知种子数据
+    await prisma.notification.create({
+      data: {
+        title: "门票核销成功通知",
+        content: `您的《${usedTicket.event.title}》门票已成功核销。欢迎在活动页面撰写您的评价！`,
+        userId: usedTicket.userId,
+        isRead: false
+      }
+    });
+  }
 }
 
 main()
