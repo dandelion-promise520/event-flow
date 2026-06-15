@@ -31,6 +31,15 @@ export async function POST(req: Request) {
       data: { status: "USED" },
     });
 
+    // 写入核销通知
+    await prisma.notification.create({
+      data: {
+        title: "✅ 门票核销成功",
+        content: `您的《${ticket.event.title}》门票已成功核销。欢迎在活动详情页撰写您的真实评价！`,
+        userId: ticket.userId,
+      },
+    });
+
     return NextResponse.json({
       success: true,
       message: "核销成功",

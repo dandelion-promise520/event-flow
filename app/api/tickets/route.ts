@@ -70,6 +70,15 @@ export async function POST(req: Request) {
       },
     });
 
+    // 写入购票通知
+    await prisma.notification.create({
+      data: {
+        title: "🎫 购票成功通知",
+        content: `您已成功报名活动。您的电子核销码为: ${ticketCode}，请凭此码入场。`,
+        userId,
+      },
+    });
+
     return NextResponse.json({ success: true, ticket });
   } catch (error) {
     const message = error instanceof Error ? error.message : "未知错误";
