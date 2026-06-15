@@ -77,31 +77,18 @@
 pnpm install
 ```
 
-### 2. 环境变量配置
+此时会自动触发 `postinstall` 钩子生成项目的 Prisma 客户端（无需手动配置 `.env`，项目已内置该配置文件）。
 
-在根目录下创建 `.env` 文件（或直接使用已有的 `.env`），确保包含以下配置以指向本地 SQLite 数据库：
+### 2. 启动开发服务器
 
-```env
-DATABASE_URL="file:./prisma/dev.db"
-```
-
-### 3. 数据库迁移与数据填充
-
-执行以下命令来推送数据库结构并填充初始种子数据：
-
-```bash
-# 生成 Prisma 客户端并同步数据库
-npx prisma db push
-
-# 填充种子测试数据 (用户、活动等)
-npx prisma db seed
-```
-
-### 4. 启动本地开发服务器
+执行以下命令：
 
 ```bash
 pnpm dev
 ```
+
+> 💡 **提示**：首次启动开发服务器时，项目会自动检测并为您初始化 SQLite 数据库文件（`prisma/dev.db`）并填充预置的测试数据。再次启动时将自动跳过该过程。
+
 打开浏览器访问 [http://localhost:3000](http://localhost:3000)。
 
 ### 5. 默认测试账户
