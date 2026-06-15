@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Plus, Trash2, Megaphone, Download } from "lucide-react";
+import { Loader2, Plus, Trash2, Megaphone, Download, Calendar as CalendarIcon, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,6 +14,12 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { FieldGroup, Field, FieldLabel } from "@/components/ui/field";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { format } from "date-fns";
+import { zhCN } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 const categories = [
   { label: "学术讲座", value: "学术讲座" },
@@ -68,15 +74,24 @@ export default function Dashboard() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
   const [capacity, setCapacity] = useState("50");
   const [category, setCategory] = useState("学术讲座");
   const [eventMsg, setEventMsg] = useState("");
 
+  // 日期时间选择器的局部状态
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedHour, setSelectedHour] = useState("09");
+  const [selectedMinute, setSelectedMinute] = useState("00");
+
+  // 计算日期时间字符串
+  const startTime = selectedDate
+    ? `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}T${selectedHour}:${selectedMinute}`
+    : "";
+  const endTime = startTime;
+
   // 门票核销码状态
   const [ticketCodeInput, setTicketCodeInput] = useState("");
-  const [checkinMsg, setCheckinMsg] = useState("");
+  const [checkinMsg, setCheckinMsg] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   // 看板与 Tab/明细状态
   const [activeTab, setActiveTab] = useState<"events" | "tickets">("events");
@@ -103,7 +118,7 @@ export default function Dashboard() {
         const res = await fetch(`/api/events/dashboard?organizerId=${currUser.id}`);
         const data = await res.json();
         if (data.events) {
-          const formatted = data.events.map((e: any) => ({
+          const formatted = data.events.map((e: EventType) => ({
             ...e,
             bookedCount: e.soldCount,
           }));
@@ -233,8 +248,9 @@ export default function Dashboard() {
         setTitle("");
         setDescription("");
         setLocation("");
-        setStartTime("");
-        setEndTime("");
+        setSelectedDate(undefined);
+        setSelectedHour("09");
+        setSelectedMinute("00");
         loadDashboardData(user);
       } else {
         setEventMsg(data.message || "创建失败");
@@ -246,22 +262,39 @@ export default function Dashboard() {
 
   const handleCheckin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setCheckinMsg("");
+    setCheckinMsg(null);
+    const code = ticketCodeInput.trim();
+    if (!code) {
+      setCheckinMsg({
+        text: "请先输入门票代码",
+        type: "error",
+      });
+      return;
+    }
     try {
       const res = await fetch("/api/tickets/checkin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ticketCode: ticketCodeInput }),
+        body: JSON.stringify({ ticketCode: code }),
       });
       const data = await res.json();
       if (data.success) {
-        setCheckinMsg(`核销成功: ${data.detail.userName} 已进入 ${data.detail.eventTitle}`);
+        setCheckinMsg({
+          text: `核销成功: ${data.detail.userName} 已进入 ${data.detail.eventTitle}`,
+          type: "success",
+        });
         setTicketCodeInput("");
       } else {
-        setCheckinMsg(data.message || "核销失败");
+        setCheckinMsg({
+          text: data.message || "核销失败",
+          type: "error",
+        });
       }
     } catch {
-      setCheckinMsg("核销接口故障");
+      setCheckinMsg({
+        text: "核销接口故障",
+        type: "error",
+      });
     }
   };
 
@@ -275,7 +308,7 @@ export default function Dashboard() {
   if (loading || !user) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+        <Loader2 className="h-6 w-6 animate-spin text-neutral-900" />
       </div>
     );
   }
@@ -308,7 +341,7 @@ export default function Dashboard() {
                     </span>
                     <span
                       className={`text-xs font-semibold ${
-                        t.status === "UNUSED" ? "text-indigo-600" : "text-neutral-400"
+                        t.status === "UNUSED" ? "text-neutral-900" : "text-neutral-400"
                       }`}
                     >
                       {t.status === "UNUSED" ? "● 待核销" : "● 已使用"}
@@ -350,7 +383,6 @@ export default function Dashboard() {
                   placeholder="输入门票代码 (e.g. EVT-...)"
                   value={ticketCodeInput}
                   onChange={(e) => setTicketCodeInput(e.target.value)}
-                  required
                   className="h-10 flex-1 bg-white"
                 />
                 <Button
@@ -360,7 +392,27 @@ export default function Dashboard() {
                   一键核销
                 </Button>
               </form>
-              {checkinMsg && <p className="mt-3 text-xs text-indigo-600 font-semibold">{checkinMsg}</p>}
+              {checkinMsg && (
+                <Alert
+                  variant={checkinMsg.type === "success" ? "default" : "destructive"}
+                  className={cn(
+                    "mt-3 transition-all duration-300",
+                    checkinMsg.type === "success"
+                      ? "border-emerald-100 bg-emerald-50/60 text-emerald-800 *:data-[slot=alert-description]:text-emerald-700 dark:border-emerald-950/40 dark:bg-emerald-950/10 dark:text-emerald-400 *:data-[slot=alert-description]:dark:text-emerald-400/90"
+                      : "border-rose-100 bg-rose-50/60 text-rose-800 *:data-[slot=alert-description]:text-rose-700 dark:border-rose-950/40 dark:bg-rose-950/10 dark:text-rose-400 *:data-[slot=alert-description]:dark:text-rose-400/90"
+                  )}
+                >
+                  {checkinMsg.type === "success" ? (
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+                  )}
+                  <AlertTitle className="font-semibold select-none">
+                    {checkinMsg.type === "success" ? "核销成功" : "核销失败"}
+                  </AlertTitle>
+                  <AlertDescription>{checkinMsg.text}</AlertDescription>
+                </Alert>
+              )}
             </div>
 
             {/* 创建活动 */}
@@ -414,15 +466,62 @@ export default function Dashboard() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <Field>
-                      <FieldLabel>开始时间</FieldLabel>
-                      <Input
-                        type="datetime-local"
-                        value={startTime}
-                        onChange={(e) => setStartTime(e.target.value)}
-                        required
-                        className="bg-white"
-                      />
+                      <FieldLabel>开始日期</FieldLabel>
+                      <Popover>
+                        <PopoverTrigger className={cn(
+                          "flex h-8 w-full items-center justify-start gap-1.5 rounded-lg border border-neutral-200 bg-white py-2 pr-2 pl-2.5 text-xs text-left whitespace-nowrap transition-colors outline-hidden select-none hover:bg-neutral-50 cursor-pointer",
+                          !selectedDate && "text-muted-foreground"
+                        )}>
+                          <CalendarIcon className="h-4 w-4 text-neutral-400" />
+                          {selectedDate ? format(selectedDate, "yyyy-MM-dd") : "选择日期"}
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 bg-white border border-neutral-200 shadow-md rounded-lg" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={selectedDate}
+                            onSelect={setSelectedDate}
+                            locale={zhCN}
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </Field>
+                    <Field>
+                      <FieldLabel>具体时间</FieldLabel>
+                      <div className="flex gap-2 items-center">
+                        <Select value={selectedHour} onValueChange={(val) => setSelectedHour(val || "00")}>
+                          <SelectTrigger className="h-8 text-xs bg-white w-20">
+                            <SelectValue placeholder="时" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white border border-neutral-200 shadow-md rounded-lg max-h-60 overflow-y-auto">
+                            <SelectGroup>
+                              {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0")).map((h) => (
+                                <SelectItem key={h} value={h}>
+                                  {h}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                        <span className="text-neutral-400 text-xs">:</span>
+                        <Select value={selectedMinute} onValueChange={(val) => setSelectedMinute(val || "00")}>
+                          <SelectTrigger className="h-8 text-xs bg-white w-20">
+                            <SelectValue placeholder="分" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white border border-neutral-200 shadow-md rounded-lg max-h-60 overflow-y-auto">
+                            <SelectGroup>
+                              {Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0")).map((m) => (
+                                <SelectItem key={m} value={m}>
+                                  {m}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </Field>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
                     <Field>
                       <FieldLabel>地点</FieldLabel>
                       <Input
@@ -430,12 +529,9 @@ export default function Dashboard() {
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
                         required
-                        className="bg-white"
+                        className="bg-white h-8 text-xs"
                       />
                     </Field>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
                     <Field>
                       <FieldLabel>名额上限 (张)</FieldLabel>
                       <Input
@@ -443,12 +539,12 @@ export default function Dashboard() {
                         value={capacity}
                         onChange={(e) => setCapacity(e.target.value)}
                         required
-                        className="bg-white"
+                        className="bg-white h-8 text-xs"
                       />
                     </Field>
                   </div>
 
-                  {eventMsg && <p className="text-xs text-indigo-600 font-semibold">{eventMsg}</p>}
+                  {eventMsg && <p className="text-xs text-neutral-900 font-semibold">{eventMsg}</p>}
 
                   <Button
                     type="submit"
@@ -470,26 +566,26 @@ export default function Dashboard() {
                 onClick={() => setActiveTab("events")}
                 className={`text-sm font-bold pb-2 relative transition-all ${
                   activeTab === "events"
-                    ? "text-indigo-600"
+                    ? "text-neutral-900"
                     : "text-neutral-400 hover:text-neutral-600"
                 }`}
               >
                 活动管理
                 {activeTab === "events" && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-neutral-900 rounded-full" />
                 )}
               </button>
               <button
                 onClick={() => setActiveTab("tickets")}
                 className={`text-sm font-bold pb-2 relative transition-all ${
                   activeTab === "tickets"
-                    ? "text-indigo-600"
+                    ? "text-neutral-900"
                     : "text-neutral-400 hover:text-neutral-600"
                 }`}
               >
                 门票核销明细表
                 {activeTab === "tickets" && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-neutral-900 rounded-full" />
                 )}
               </button>
             </div>
@@ -518,7 +614,7 @@ export default function Dashboard() {
                             setBroadcastContent("");
                             setBroadcastMsg("");
                           }}
-                          className="h-8 px-3 text-[11px] font-semibold text-indigo-600 border-indigo-200 hover:bg-indigo-50/50 flex items-center gap-1"
+                          className="h-8 px-3 text-[11px] font-semibold text-neutral-700 hover:bg-neutral-50 flex items-center gap-1"
                         >
                           <Megaphone className="h-3 w-3" />
                           群发消息
@@ -551,28 +647,50 @@ export default function Dashboard() {
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="h-8 text-[11px] bg-white w-full sm:w-48"
                       />
-                      <select
+                      <Select
                         value={eventFilter}
-                        onChange={(e) => setEventFilter(e.target.value)}
-                        className="h-8 text-[11px] rounded-lg border border-neutral-200 bg-white px-2.5 py-1 text-neutral-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                        onValueChange={(val) => setEventFilter(val || "all")}
                       >
-                        <option value="all">所有活动</option>
-                        {Array.from(new Set(dashboardTickets.map((t) => t.eventTitle))).map((title) => (
-                          <option key={title} value={title}>
-                            {title}
-                          </option>
-                        ))}
-                      </select>
-                      <select
+                        <SelectTrigger className="h-8 text-[11px] bg-white min-w-44 max-w-xs">
+                          <SelectValue placeholder="所有活动">
+                            {eventFilter === "all" ? "所有活动" : eventFilter}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent alignItemWithTrigger={false} className="bg-white border border-neutral-200 shadow-md rounded-lg w-auto min-w-[220px] max-w-xs sm:max-w-md max-h-60 overflow-y-auto z-50">
+                          <SelectGroup>
+                            <SelectItem value="all">所有活动</SelectItem>
+                            {Array.from(new Set(dashboardTickets.map((t) => t.eventTitle))).map((title) => (
+                              <SelectItem key={title} value={title}>
+                                {title}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                      <Select
                         value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="h-8 text-[11px] rounded-lg border border-neutral-200 bg-white px-2.5 py-1 text-neutral-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                        onValueChange={(val) => setStatusFilter(val || "all")}
                       >
-                        <option value="all">所有状态</option>
-                        <option value="UNUSED">未使用</option>
-                        <option value="USED">已核销</option>
-                        <option value="CANCELLED">已取消</option>
-                      </select>
+                        <SelectTrigger className="h-8 text-[11px] bg-white w-28">
+                          <SelectValue placeholder="所有状态">
+                            {statusFilter === "all"
+                              ? "所有状态"
+                              : statusFilter === "UNUSED"
+                              ? "未使用"
+                              : statusFilter === "USED"
+                              ? "已核销"
+                              : "已取消"}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border border-neutral-200 shadow-md rounded-lg">
+                          <SelectGroup>
+                            <SelectItem value="all">所有状态</SelectItem>
+                            <SelectItem value="UNUSED">未使用</SelectItem>
+                            <SelectItem value="USED">已核销</SelectItem>
+                            <SelectItem value="CANCELLED">已取消</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
                     </div>
                     
                     <Button
@@ -614,7 +732,7 @@ export default function Dashboard() {
                                   t.status === "USED"
                                     ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
                                     : t.status === "UNUSED"
-                                    ? "bg-indigo-50 text-indigo-700 border border-indigo-100"
+                                    ? "bg-secondary text-secondary-foreground border border-border"
                                     : "bg-red-50 text-red-700 border border-red-100"
                                 }`}
                               >
@@ -700,7 +818,7 @@ export default function Dashboard() {
                 <Button
                   type="submit"
                   disabled={broadcastLoading}
-                  className="h-9 px-4 text-xs bg-indigo-600 hover:bg-indigo-700 text-white"
+                  className="h-9 px-4 text-xs bg-neutral-900 hover:bg-neutral-800 text-white"
                 >
                   {broadcastLoading ? "发送中..." : "确定发送"}
                 </Button>
