@@ -1,4 +1,4 @@
-# Next.js 票务及活动管理系统模板
+# EventFlow - 票务及活动管理系统
 
 这是一个基于 **Next.js 16 (App Router)**、**React 19** 和 **TypeScript 6.0.3** 构建的全栈活动与票务管理系统模板。项目深度集成了 **Prisma ORM**、**SQLite** 以及 **shadcn/ui** 与 **Tailwind CSS v4**。
 
