@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      String   @default("USER") // "ADMIN", "ORGANIZER", "USER"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  events    Event[]  @relation("CreatedEvents")
+  tickets   Ticket[]
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  coverUrl    String?
+  location    String
+  startTime   DateTime
+  endTime     DateTime
+  capacity    Int
+  price       Float    @default(0.0)
+  category    String
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  organizerId String
+  organizer   User     @relation("CreatedEvents", fields: [organizerId], references: [id], onDelete: Cascade)
+  tickets     Ticket[]
+}
+
+model Ticket {
+  id         String   @id @default(uuid())
+  ticketCode String   @unique
+  status     String   @default("UNUSED") // "UNUSED", "USED", "CANCELLED"
+  bookedAt   DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId    String
+  event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+}
