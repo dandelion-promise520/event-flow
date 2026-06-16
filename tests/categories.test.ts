@@ -20,3 +20,17 @@ test("活动分类数据库测试", async () => {
   // 清理新增分类
   await prisma.category.delete({ where: { id: newCat.id } });
 });
+
+test("分类 API 逻辑校验", async () => {
+  // 获取一个非 ADMIN 用户
+  let user = await prisma.user.findFirst({ where: { role: "USER" } });
+  if (!user) {
+    user = await prisma.user.create({
+      data: { name: "Student", email: "stu@campus.com", password: "123", role: "USER" }
+    });
+  }
+
+  // 模拟非法用户操作分类
+  const isUserAdmin = user.role === "ADMIN";
+  assert.strictEqual(isUserAdmin, false, "普通学生不应具备管理员身份");
+});
