@@ -6,6 +6,16 @@ async function main() {
   await prisma.ticket.deleteMany({});
   await prisma.event.deleteMany({});
   await prisma.user.deleteMany({});
+  await prisma.category.deleteMany({});
+
+  // 创建初始分类
+  await prisma.category.createMany({
+    data: [
+      { name: "学术讲座" },
+      { name: "文体比赛" },
+      { name: "社团活动" },
+    ]
+  });
 
   const passwordHash = await bcrypt.hash("admin123", 10);
 
