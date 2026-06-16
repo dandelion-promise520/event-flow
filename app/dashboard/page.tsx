@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import {
   Loader2,
   Plus,
@@ -103,6 +104,7 @@ export default function Dashboard() {
   const [tickets, setTickets] = useState<TicketType[]>([])
   const [createdEvents, setCreatedEvents] = useState<EventType[]>([])
   const [loading, setLoading] = useState<boolean>(true)
+  const [dbCategories, setDbCategories] = useState<{ label: string; value: string }[]>([])
 
   // 主办方创建活动表单状态
   const [title, setTitle] = useState("")
@@ -446,6 +448,21 @@ export default function Dashboard() {
       setUser(curr)
       loadDashboardData(curr)
     }, 0)
+
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch("/api/categories")
+        if (res.ok) {
+          const data = await res.json()
+          if (Array.isArray(data)) {
+            setDbCategories(data.map((c: any) => ({ label: c.name, value: c.name })))
+          }
+        }
+      } catch (err) {
+        console.error("加载动态分类失败:", err)
+      }
+    }
+    fetchCategories()
   }, [])
 
   const handleCreateOrUpdateEvent = async (e: React.FormEvent) => {
@@ -594,13 +611,48 @@ export default function Dashboard() {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-12">
-      <div className="flex items-center justify-between border-b border-border/60 pb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">个人控制台</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            欢迎回来，{user.name} ({user.role === "USER" ? "学生" : "主办方"})
-          </p>
+      <div className="flex flex-col gap-6 border-b border-border/60 pb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">个人控制台</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              欢迎回来，{user.name} ({user.role === "USER" ? "学生" : user.role === "ADMIN" ? "系统管理员" : "主办方"})
+            </p>
+          </div>
         </div>
+
+        {user.role === "ADMIN" && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Link
+              href="/dashboard/categories"
+              className="flex items-center justify-between rounded-2xl border border-border bg-card p-6 shadow-xs hover:bg-muted/50 transition-colors"
+            >
+              <div>
+                <h3 className="font-bold text-foreground">活动分类管理</h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  对校园活动类型进行创建、重命名或删除维护
+                </p>
+              </div>
+              <span className="text-xl font-bold text-muted-foreground/50">
+                📂
+              </span>
+            </Link>
+            <Link
+              href="/dashboard/accounts"
+              className="flex items-center justify-between rounded-2xl border border-border bg-card p-6 shadow-xs hover:bg-muted/50 transition-colors"
+            >
+              <div>
+                <h3 className="font-bold text-foreground">系统账号管理</h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  新建、修改、重置密码及移除系统账号
+                </p>
+              </div>
+              <span className="text-xl font-bold text-muted-foreground/50">
+                👥
+              </span>
+            </Link>
+          </div>
+        )}
       </div>
 
       {user.role === "USER" ? (
@@ -786,14 +838,14 @@ export default function Dashboard() {
                     <Select
                       value={category}
                       onValueChange={(val) => setCategory(val || "")}
-                      items={categories}
+                      items={dbCategories.length > 0 ? dbCategories : categories}
                     >
                       <SelectTrigger className="w-full bg-background text-foreground">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
-                          {categories.map((cat) => (
+                          {(dbCategories.length > 0 ? dbCategories : categories).map((cat) => (
                             <SelectItem key={cat.value} value={cat.value}>
                               {cat.label}
                             </SelectItem>

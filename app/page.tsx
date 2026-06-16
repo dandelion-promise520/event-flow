@@ -11,6 +11,24 @@ export default function Home() {
   const [events, setEvents] = useState<EventItem[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string>("")
   const [keyword, setKeyword] = useState<string>("")
+  const [dbCategories, setDbCategories] = useState<string[]>(["", "学术讲座", "文体比赛", "社团活动"])
+
+  useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const res = await fetch("/api/categories")
+        if (res.ok) {
+          const data = await res.json()
+          if (Array.isArray(data)) {
+            setDbCategories(["", ...data.map((c: any) => c.name)])
+          }
+        }
+      } catch (err) {
+        console.error("加载动态分类失败:", err)
+      }
+    }
+    fetchCats()
+  }, [])
 
   const fetchEvents = useCallback(async () => {
     let url = `/api/events`
@@ -63,7 +81,7 @@ export default function Home() {
 
       {/* Category Filter */}
       <div className="mt-12 flex flex-wrap items-center justify-center gap-2.5">
-        {["", "学术讲座", "文体比赛", "社团活动"].map((cat) => (
+        {dbCategories.map((cat) => (
           <Button
             key={cat}
             onClick={() => setSelectedCategory(cat)}
