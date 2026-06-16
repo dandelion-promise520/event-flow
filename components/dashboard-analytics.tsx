@@ -7,6 +7,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   Pie,
   PieChart,
   XAxis,
@@ -183,7 +184,14 @@ export default function DashboardAnalytics({
                   innerRadius={50}
                   outerRadius={75}
                   paddingAngle={3}
-                />
+                >
+                  {categoryData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={`hsl(var(--chart-${(index % 5) + 1}))`}
+                    />
+                  ))}
+                </Pie>
               </PieChart>
             </ChartContainer>
           </CardContent>
