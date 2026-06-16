@@ -34,6 +34,17 @@ import { format } from "date-fns"
 import { zhCN } from "date-fns/locale"
 import { cn, isTicketWithinDateRange } from "@/lib/utils"
 import { DateRange } from "react-day-picker"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 const categories = [
   { label: "学术讲座", value: "学术讲座" },
@@ -402,7 +413,6 @@ export default function Dashboard() {
 
   const handleDeleteEvent = async (id: string) => {
     if (!user) return
-    if (!confirm("确定要删除此活动吗？")) return
     await fetch(`/api/events?id=${id}`, { method: "DELETE" })
     loadDashboardData(user)
   }
@@ -419,9 +429,7 @@ export default function Dashboard() {
     <div className="mx-auto max-w-7xl px-6 py-12">
       <div className="flex items-center justify-between border-b border-border/60 pb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            个人控制台
-          </h1>
+          <h1 className="text-2xl font-bold text-foreground">个人控制台</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             欢迎回来，{user.name} ({user.role === "USER" ? "学生" : "主办方"})
           </p>
@@ -431,9 +439,7 @@ export default function Dashboard() {
       {user.role === "USER" ? (
         /* 学生控制台 - 查看电子票根 */
         <div className="mt-10">
-          <h2 className="text-lg font-bold text-foreground">
-            我的活动门票
-          </h2>
+          <h2 className="text-lg font-bold text-foreground">我的活动门票</h2>
           <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {tickets.map((t) => (
               <div
@@ -594,8 +600,7 @@ export default function Dashboard() {
                         <PopoverTrigger
                           className={cn(
                             "flex h-8 w-full cursor-pointer items-center justify-start gap-1.5 rounded-lg border border-border bg-background py-2 pr-2 pl-2.5 text-left text-xs whitespace-nowrap text-foreground outline-hidden transition-colors select-none hover:bg-muted",
-                            !selectedDate &&
-                              "text-muted-foreground/80"
+                            !selectedDate && "text-muted-foreground/80"
                           )}
                         >
                           <CalendarIcon className="h-4 w-4 text-muted-foreground/80" />
@@ -787,14 +792,37 @@ export default function Dashboard() {
                           <Megaphone className="h-3 w-3" />
                           群发消息
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => handleDeleteEvent(evt.id)}
-                          className="h-8 w-8 text-muted-foreground/80 hover:border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger
+                            render={
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground/80 hover:border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            }
+                          />
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                确认删除此活动吗?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                此操作无法撤销，这样做之后就不可挽回了。
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>取消</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteEvent(evt.id)}
+                              >
+                                确认
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
                   ))}
@@ -872,8 +900,7 @@ export default function Dashboard() {
                         <PopoverTrigger
                           className={cn(
                             "flex h-8 min-w-44 cursor-pointer items-center justify-start gap-1.5 rounded-lg border border-border bg-background py-2 pr-2 pl-2.5 text-left text-xs whitespace-nowrap text-muted-foreground outline-hidden transition-colors select-none hover:bg-muted",
-                            !dateRange?.from &&
-                              "text-muted-foreground/80"
+                            !dateRange?.from && "text-muted-foreground/80"
                           )}
                         >
                           <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground/80" />
@@ -1005,9 +1032,7 @@ export default function Dashboard() {
       {broadcastEventId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md animate-in rounded-2xl border border-border bg-card p-6 shadow-xl duration-200 fade-in zoom-in">
-            <h3 className="text-lg font-bold text-foreground">
-              群发广播通知
-            </h3>
+            <h3 className="text-lg font-bold text-foreground">群发广播通知</h3>
             <p className="mt-1 text-xs text-muted-foreground">
               向所有订购该活动门票的用户发送站内信通知。
             </p>
