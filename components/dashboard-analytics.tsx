@@ -44,27 +44,27 @@ interface DashboardAnalyticsProps {
 const chartConfig = {
   booked: {
     label: "已报名人数",
-    color: "hsl(var(--chart-1))",
+    color: "var(--color-chart-1)",
   },
   capacity: {
     label: "活动总容量",
-    color: "hsl(var(--chart-2))",
+    color: "var(--color-chart-2)",
   },
   count: {
     label: "单日订票数",
-    color: "hsl(var(--chart-1))",
+    color: "var(--color-chart-1)",
   },
   "学术讲座": {
     label: "学术讲座",
-    color: "hsl(var(--chart-1))",
+    color: "var(--color-chart-1)",
   },
   "文体比赛": {
     label: "文体比赛",
-    color: "hsl(var(--chart-2))",
+    color: "var(--color-chart-2)",
   },
   "社团活动": {
     label: "社团活动",
-    color: "hsl(var(--chart-3))",
+    color: "var(--color-chart-3)",
   },
 } satisfies ChartConfig
 
@@ -154,15 +154,15 @@ export default function DashboardAnalytics({
               <AreaChart data={trendsData} margin={{ left: -10, right: 10, top: 10, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="var(--color-chart-1)" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="var(--color-chart-1)" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.3} />
                 <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} fontSize={11} />
                 <YAxis tickLine={false} axisLine={false} fontSize={11} />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Area type="monotone" dataKey="count" stroke="hsl(var(--chart-1))" strokeWidth={2} fillOpacity={1} fill="url(#colorCount)" />
+                <Area type="monotone" dataKey="count" stroke="var(--color-chart-1)" strokeWidth={2} fillOpacity={1} fill="url(#colorCount)" />
               </AreaChart>
             </ChartContainer>
           </CardContent>
@@ -188,7 +188,7 @@ export default function DashboardAnalytics({
                   {categoryData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={`hsl(var(--chart-${(index % 5) + 1}))`}
+                      fill={`var(--color-chart-${(index % 5) + 1})`}
                     />
                   ))}
                 </Pie>
@@ -211,8 +211,8 @@ export default function DashboardAnalytics({
               <XAxis dataKey="title" tickLine={false} axisLine={false} tickMargin={8} fontSize={11} />
               <YAxis tickLine={false} axisLine={false} fontSize={11} />
               <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar dataKey="booked" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} maxBarSize={32} name="已报名数" />
-              <Bar dataKey="capacity" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} maxBarSize={32} name="总名额" />
+              <Bar dataKey="booked" fill="var(--color-chart-1)" radius={[4, 4, 0, 0]} maxBarSize={32} name="已报名数" />
+              <Bar dataKey="capacity" fill="var(--color-chart-2)" radius={[4, 4, 0, 0]} maxBarSize={32} name="总名额" />
             </BarChart>
           </ChartContainer>
         </CardContent>
