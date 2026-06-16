@@ -83,13 +83,13 @@ export default function Navbar() {
           </Link>
           {user ? (
             <>
-              <NotificationCenter />
               <Link
                 href="/dashboard"
                 className="text-sm font-medium text-muted-foreground hover:text-foreground"
               >
                 控制台 ({user.name})
               </Link>
+              <NotificationCenter />
               <Button
                 variant="ghost"
                 onClick={handleLogout}

@@ -12,6 +12,7 @@ import {
   AlertCircle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { FileUploader, type UploadFile } from "@/components/ui/file-uploader"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -102,6 +103,49 @@ export default function Dashboard() {
   const [capacity, setCapacity] = useState("50")
   const [category, setCategory] = useState("学术讲座")
   const [eventMsg, setEventMsg] = useState("")
+  const [uploadedFiles, setUploadedFiles] = useState<UploadFile[]>([])
+
+  const handleImageUpload = async (
+    file: UploadFile,
+    onProgress: (progress: number) => void
+  ) => {
+    const formData = new FormData()
+    if (file.rawFile) {
+      formData.append("file", file.rawFile)
+    }
+
+    return new Promise<{ url: string }>((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      xhr.open("POST", "/api/upload")
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const progress = Math.round((event.loaded / event.total) * 100)
+          onProgress(progress)
+        }
+      }
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const data = JSON.parse(xhr.responseText)
+            if (data.success) {
+              resolve({ url: data.url })
+            } else {
+              reject(new Error(data.message || "上传失败"))
+            }
+          } catch {
+            reject(new Error("解析响应失败"))
+          }
+        } else {
+          reject(new Error(`服务器响应错误: ${xhr.status}`))
+        }
+      }
+
+      xhr.onerror = () => reject(new Error("网络错误，上传失败"))
+      xhr.send(formData)
+    })
+  }
 
   // 日期时间选择器的局部状态
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
@@ -339,6 +383,8 @@ export default function Dashboard() {
       return
     }
 
+    const coverUrl = uploadedFiles.find((f) => f.status === "success")?.url || null
+
     try {
       const res = await fetch("/api/events", {
         method: "POST",
@@ -346,6 +392,7 @@ export default function Dashboard() {
         body: JSON.stringify({
           title,
           description,
+          coverUrl,
           location,
           startTime,
           endTime,
@@ -364,6 +411,7 @@ export default function Dashboard() {
         setSelectedDate(undefined)
         setSelectedHour("09")
         setSelectedMinute("00")
+        setUploadedFiles([])
         loadDashboardData(user)
       } else {
         setEventMsg(data.message || "创建失败")
@@ -590,6 +638,18 @@ export default function Dashboard() {
                       required
                       rows={3}
                       className="bg-background text-foreground"
+                    />
+                  </Field>
+
+                  <Field>
+                    <FieldLabel>活动封面</FieldLabel>
+                    <FileUploader
+                      value={uploadedFiles}
+                      onChange={setUploadedFiles}
+                      onUpload={handleImageUpload}
+                      maxCount={1}
+                      accept="image/*"
+                      maxSize={5}
                     />
                   </Field>
 
@@ -1029,15 +1089,27 @@ export default function Dashboard() {
       )}
 
       {/* 广播弹窗 */}
-      {broadcastEventId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md animate-in rounded-2xl border border-border bg-card p-6 shadow-xl duration-200 fade-in zoom-in">
-            <h3 className="text-lg font-bold text-foreground">群发广播通知</h3>
-            <p className="mt-1 text-xs text-muted-foreground">
-              向所有订购该活动门票的用户发送站内信通知。
-            </p>
+      <AlertDialog
+        open={!!broadcastEventId}
+        onOpenChange={(open) => {
+          if (!open) {
+            setBroadcastEventId(null)
+            setBroadcastTitle("")
+            setBroadcastContent("")
+            setBroadcastMsg("")
+          }
+        }}
+      >
+        <AlertDialogContent className="sm:max-w-md">
+          <form onSubmit={handleSendBroadcast} className="space-y-4">
+            <AlertDialogHeader>
+              <AlertDialogTitle>群发广播通知</AlertDialogTitle>
+              <AlertDialogDescription>
+                向所有订购该活动门票的用户发送站内信通知。
+              </AlertDialogDescription>
+            </AlertDialogHeader>
 
-            <form onSubmit={handleSendBroadcast} className="mt-4 space-y-4">
+            <div className="space-y-4">
               <div>
                 <label className="text-xs font-bold text-foreground/80">
                   通知标题
@@ -1067,39 +1139,41 @@ export default function Dashboard() {
 
               {broadcastMsg && (
                 <p
-                  className={`text-xs font-semibold ${broadcastMsg.includes("成功") ? "text-emerald-600" : "text-destructive"}`}
+                  className={`text-xs font-semibold ${
+                    broadcastMsg.includes("成功")
+                      ? "text-emerald-600"
+                      : "text-destructive"
+                  }`}
                 >
                   {broadcastMsg}
                 </p>
               )}
+            </div>
 
-              <div className="flex justify-end gap-2 pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setBroadcastEventId(null)
-                    setBroadcastTitle("")
-                    setBroadcastContent("")
-                    setBroadcastMsg("")
-                  }}
-                  disabled={broadcastLoading}
-                  className="h-9 px-4 text-xs"
-                >
-                  取消
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={broadcastLoading}
-                  className="h-9 bg-brand px-4 text-xs text-brand-foreground hover:bg-brand/90"
-                >
-                  {broadcastLoading ? "发送中..." : "确定发送"}
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                type="button"
+                onClick={() => {
+                  setBroadcastEventId(null)
+                  setBroadcastTitle("")
+                  setBroadcastContent("")
+                  setBroadcastMsg("")
+                }}
+                disabled={broadcastLoading}
+              >
+                取消
+              </AlertDialogCancel>
+              <Button
+                type="submit"
+                disabled={broadcastLoading}
+                className="bg-brand text-brand-foreground hover:bg-brand/90"
+              >
+                {broadcastLoading ? "发送中..." : "确定发送"}
+              </Button>
+            </AlertDialogFooter>
+          </form>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
