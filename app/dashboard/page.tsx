@@ -859,6 +859,51 @@ export default function Dashboard() {
                           </SelectGroup>
                         </SelectContent>
                       </Select>
+
+                      {/* 日期范围筛选 */}
+                      <Popover>
+                        <PopoverTrigger
+                          className={cn(
+                            "flex h-8 items-center justify-start gap-1.5 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-zinc-950 py-2 pr-2 pl-2.5 text-xs text-left whitespace-nowrap transition-colors outline-hidden select-none hover:bg-neutral-50 dark:hover:bg-zinc-900 cursor-pointer text-neutral-700 dark:text-neutral-300 min-w-44",
+                            !dateRange?.from && "text-neutral-400 dark:text-neutral-500"
+                          )}
+                        >
+                          <CalendarIcon className="h-3.5 w-3.5 text-neutral-400 dark:text-neutral-500" />
+                          {dateRange?.from ? (
+                            dateRange.to ? (
+                              <>
+                                {format(dateRange.from, "yyyy-MM-dd")} ~{" "}
+                                {format(dateRange.to, "yyyy-MM-dd")}
+                              </>
+                            ) : (
+                              format(dateRange.from, "yyyy-MM-dd")
+                            )
+                          ) : (
+                            "选择订票日期范围"
+                          )}
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="w-auto p-0 bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-neutral-800 shadow-md rounded-lg"
+                          align="start"
+                        >
+                          <Calendar
+                            mode="range"
+                            selected={dateRange}
+                            onSelect={setDateRange}
+                            locale={zhCN}
+                            className="dark:bg-zinc-950 dark:text-neutral-100"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      {dateRange && (dateRange.from || dateRange.to) && (
+                        <Button
+                          variant="ghost"
+                          onClick={() => setDateRange(undefined)}
+                          className="h-8 px-2 text-[11px] text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-zinc-800 cursor-pointer"
+                        >
+                          清除日期
+                        </Button>
+                      )}
                     </div>
 
                     <Button
