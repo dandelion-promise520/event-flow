@@ -86,7 +86,7 @@ export default function NotificationCenter() {
         variant="ghost"
         size="icon"
         onClick={() => setOpen(!open)}
-        className="relative rounded-full hover:bg-muted/80 text-neutral-600 hover:text-black dark:text-neutral-400 dark:hover:text-white transition-colors"
+        className="relative rounded-full hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
@@ -98,20 +98,20 @@ export default function NotificationCenter() {
       </Button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-80 bg-popover text-popover-foreground rounded-xl border border-neutral-200 dark:border-neutral-800 shadow-xl z-50 overflow-hidden bg-white dark:bg-zinc-950 animate-in fade-in-50 slide-in-from-top-1 duration-200">
-          <div className="p-3.5 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between bg-neutral-50/50 dark:bg-zinc-900/50">
-            <span className="font-semibold text-sm text-neutral-800 dark:text-neutral-200">站内通知</span>
+        <div className="absolute right-0 mt-2 w-80 bg-popover text-popover-foreground rounded-xl border border-border shadow-xl z-50 overflow-hidden animate-in fade-in-50 slide-in-from-top-1 duration-200">
+          <div className="p-3.5 border-b border-border flex items-center justify-between bg-muted/50">
+            <span className="font-semibold text-sm text-foreground/90">站内通知</span>
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="text-xs text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors hover:underline flex items-center gap-1 font-medium"
+                className="text-xs text-brand hover:text-brand/80 transition-colors hover:underline flex items-center gap-1 font-medium"
               >
                 <Check className="h-3.5 w-3.5" /> 全部标为已读
               </button>
             )}
           </div>
 
-          <div className="max-h-72 overflow-y-auto divide-y divide-neutral-100 dark:divide-neutral-800">
+          <div className="max-h-72 overflow-y-auto divide-y divide-border">
             {notifications.length === 0 ? (
               <div className="p-8 text-center text-xs text-neutral-400">暂无消息</div>
             ) : (
@@ -119,7 +119,7 @@ export default function NotificationCenter() {
                 <div
                   key={n.id}
                   className={`p-3.5 text-xs transition-colors ${
-                    n.isRead ? "bg-white dark:bg-zinc-900 hover:bg-neutral-50/30 dark:hover:bg-zinc-850/30" : "bg-indigo-50/40 dark:bg-indigo-950/20 hover:bg-indigo-50/60 dark:hover:bg-indigo-950/30 font-medium"
+                    n.isRead ? "bg-card hover:bg-muted/30" : "bg-brand/10 hover:bg-brand/15 font-medium"
                   }`}
                 >
                   <div className="flex gap-2.5 items-start">
@@ -130,12 +130,12 @@ export default function NotificationCenter() {
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start gap-1 mb-1">
-                        <span className="text-neutral-900 dark:text-neutral-100 font-semibold truncate">{n.title}</span>
+                        <span className="text-foreground font-semibold truncate">{n.title}</span>
                         <span className="text-[10px] text-neutral-400 shrink-0 mt-0.5">
                           {new Date(n.createdAt).toLocaleDateString()}
                         </span>
                       </div>
-                      <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed break-words">{n.content}</p>
+                      <p className="text-muted-foreground leading-relaxed break-words">{n.content}</p>
                     </div>
                   </div>
                 </div>

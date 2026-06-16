@@ -91,55 +91,55 @@ export default function EventDetail({ params }: PageProps) {
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">
-      <Link href="/" className="inline-flex items-center gap-1 text-sm font-semibold text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white mb-8">
+      <Link href="/" className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-foreground mb-8">
         <ArrowLeft className="h-4 w-4" />
         返回大厅
       </Link>
 
-      <div className="overflow-hidden rounded-3xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-zinc-900">
+      <div className="overflow-hidden rounded-3xl border border-border bg-card">
         {event.coverUrl && (
-          <div className="aspect-[2.39/1] w-full bg-neutral-100 dark:bg-neutral-800 overflow-hidden">
+          <div className="aspect-[2.39/1] w-full bg-muted overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={event.coverUrl} alt={event.title} className="h-full w-full object-cover" />
           </div>
         )}
 
         <div className="p-8">
-          <span className="rounded-full bg-indigo-50 dark:bg-indigo-950/50 px-3 py-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+          <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">
             {event.category}
           </span>
-          <h1 className="mt-4 text-2xl md:text-3xl font-extrabold text-neutral-900 dark:text-neutral-100">{event.title}</h1>
+          <h1 className="mt-4 text-2xl md:text-3xl font-extrabold text-foreground">{event.title}</h1>
           
-          <div className="mt-6 grid gap-4 border-y border-neutral-100 dark:border-neutral-800 py-6 md:grid-cols-2">
+          <div className="mt-6 grid gap-4 border-y border-border/60 py-6 md:grid-cols-2">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-50 dark:bg-zinc-800 text-neutral-500 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-muted-foreground border border-border">
                 <Calendar className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs text-neutral-400 dark:text-neutral-500 font-semibold">开始时间</p>
-                <p className="text-sm font-bold text-neutral-800 dark:text-neutral-200">{new Date(event.startTime).toLocaleString("zh-CN")}</p>
+                <p className="text-xs text-muted-foreground/80 font-semibold">开始时间</p>
+                <p className="text-sm font-bold text-foreground/90">{new Date(event.startTime).toLocaleString("zh-CN")}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-50 dark:bg-zinc-800 text-neutral-500 dark:text-neutral-300 border border-neutral-200 dark:border-neutral-700">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-muted-foreground border border-border">
                 <MapPin className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs text-neutral-400 dark:text-neutral-500 font-semibold">活动地点</p>
-                <p className="text-sm font-bold text-neutral-800 dark:text-neutral-200">{event.location}</p>
+                <p className="text-xs text-muted-foreground/80 font-semibold">活动地点</p>
+                <p className="text-sm font-bold text-foreground/90">{event.location}</p>
               </div>
             </div>
           </div>
  
           <div className="mt-8">
-            <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">活动介绍</h2>
-            <p className="mt-3 text-neutral-600 dark:text-neutral-300 text-sm leading-relaxed whitespace-pre-wrap">{event.description}</p>
+            <h2 className="text-lg font-bold text-foreground">活动介绍</h2>
+            <p className="mt-3 text-muted-foreground text-sm leading-relaxed whitespace-pre-wrap">{event.description}</p>
           </div>
 
-          <div className="mt-10 rounded-2xl bg-neutral-50 dark:bg-zinc-800/50 border border-neutral-200 dark:border-neutral-800 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="mt-10 rounded-2xl bg-muted/50 border border-border p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">剩余容量</p>
-              <p className="text-lg font-extrabold text-neutral-900 dark:text-neutral-100">
+              <p className="text-xs text-muted-foreground">剩余容量</p>
+              <p className="text-lg font-extrabold text-foreground">
                 {event.capacity - event.bookedCount} / {event.capacity} 人
               </p>
             </div>
