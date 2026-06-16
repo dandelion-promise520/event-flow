@@ -64,20 +64,20 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-neutral-200 bg-[#fcfcfd]/80 backdrop-blur-md dark:border-neutral-800 dark:bg-zinc-950/80">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         <Link
           href="/"
-          className="flex items-center gap-2 text-lg font-bold text-black dark:text-white"
+          className="flex items-center gap-2 text-lg font-bold text-foreground"
         >
-          <Calendar className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+          <Calendar className="h-5 w-5 text-brand" />
           <span>EventFlow</span>
         </Link>
         <nav className="flex items-center gap-6">
           <ModeToggle />
           <Link
             href="/"
-            className="text-sm font-medium text-neutral-600 hover:text-black dark:text-neutral-400 dark:hover:text-white"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground"
           >
             活动探索
           </Link>
@@ -86,14 +86,14 @@ export default function Navbar() {
               <NotificationCenter />
               <Link
                 href="/dashboard"
-                className="text-sm font-medium text-neutral-600 hover:text-black dark:text-neutral-400 dark:hover:text-white"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground"
               >
                 控制台 ({user.name})
               </Link>
               <Button
                 variant="ghost"
                 onClick={handleLogout}
-                className="flex items-center gap-1.5 text-sm font-medium text-red-600 hover:bg-red-50/50 hover:text-red-800 dark:text-red-400 dark:hover:bg-red-950/30 dark:hover:text-red-300"
+                className="flex items-center gap-1.5 text-sm font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
               >
                 <LogOut data-icon="inline-start" />
                 退出
