@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Pencil,
+  X,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { FileUploader, type UploadFile } from "@/components/ui/file-uploader"
@@ -110,7 +111,9 @@ export default function Dashboard() {
   const [eventMsg, setEventMsg] = useState("")
   const [uploadedFiles, setUploadedFiles] = useState<UploadFile[]>([])
   const [editingEventId, setEditingEventId] = useState<string | null>(null)
-  const [originalStartTime, setOriginalStartTime] = useState<string | null>(null)
+  const [originalStartTime, setOriginalStartTime] = useState<string | null>(
+    null
+  )
 
   const handleImageUpload = async (
     file: UploadFile,
@@ -180,7 +183,7 @@ export default function Dashboard() {
       return
     }
     const tempStartTime = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}T${hour}:${minute}`
-    
+
     // 如果是编辑模式，且时间等于原始时间，则不进行过去时间的校验
     if (editingEventId && tempStartTime === originalStartTime) {
       setEventMsg((prev) =>
@@ -230,7 +233,7 @@ export default function Dashboard() {
     setDescription(evt.description || "")
     setLocation(evt.location)
     setCapacity(evt.capacity.toString())
-    
+
     // 处理时间回显
     const start = new Date(evt.startTime)
     setSelectedDate(start)
@@ -247,8 +250,8 @@ export default function Dashboard() {
               size: 0,
               type: "image/png",
               status: "success",
-              url: evt.coverUrl
-            }
+              url: evt.coverUrl,
+            },
           ]
         : []
     )
@@ -282,6 +285,11 @@ export default function Dashboard() {
   const [checkinMsg, setCheckinMsg] = useState<{
     text: string
     type: "success" | "error"
+    detail?: {
+      eventTitle: string
+      userName: string
+      checkinTime: string
+    }
   } | null>(null)
 
   // 看板与 Tab/明细状态
@@ -448,7 +456,8 @@ export default function Dashboard() {
       return
     }
 
-    const coverUrl = uploadedFiles.find((f) => f.status === "success")?.url || null
+    const coverUrl =
+      uploadedFiles.find((f) => f.status === "success")?.url || null
 
     try {
       let res
@@ -503,7 +512,9 @@ export default function Dashboard() {
 
       const data = await res.json()
       if (data.success) {
-        toast.success(editingEventId ? "活动更新成功！" : "活动创建并发布成功！")
+        toast.success(
+          editingEventId ? "活动更新成功！" : "活动创建并发布成功！"
+        )
         handleCancelEdit()
         loadDashboardData(user)
       } else {
@@ -536,8 +547,9 @@ export default function Dashboard() {
       const data = await res.json()
       if (data.success) {
         setCheckinMsg({
-          text: `核销成功: ${data.detail.userName} 已进入 ${data.detail.eventTitle}`,
+          text: "核销成功",
           type: "success",
+          detail: data.detail,
         })
         setTicketCodeInput("")
       } else {
@@ -601,9 +613,7 @@ export default function Dashboard() {
               >
                 <div>
                   <div className="flex items-start justify-between">
-                    <Badge variant="secondary">
-                      {t.event.category}
-                    </Badge>
+                    <Badge variant="secondary">{t.event.category}</Badge>
                     <span
                       className={`text-xs font-semibold ${
                         t.status === "UNUSED"
@@ -670,32 +680,86 @@ export default function Dashboard() {
                   一键核销
                 </Button>
               </form>
-              {checkinMsg && (
-                <Alert
-                  variant={
-                    checkinMsg.type === "success" ? "default" : "destructive"
-                  }
-                  className={cn(
-                    "mt-3 transition-all duration-300",
-                    checkinMsg.type === "success" &&
-                      "border-emerald-100 bg-emerald-50/60 text-emerald-800 *:data-[slot=alert-description]:text-emerald-700 dark:border-emerald-950/40 dark:bg-emerald-950/10 dark:text-emerald-400 *:data-[slot=alert-description]:dark:text-emerald-400/90"
-                  )}
-                >
-                  {checkinMsg.type === "success" ? (
-                    <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
-                  ) : (
-                    <AlertCircle className="size-4" />
-                  )}
-                  <AlertTitle className="font-semibold select-none">
-                    {checkinMsg.type === "success" ? "核销成功" : "核销失败"}
-                  </AlertTitle>
-                  <AlertDescription>{checkinMsg.text}</AlertDescription>
-                </Alert>
-              )}
+              {checkinMsg &&
+                (checkinMsg.type === "success" ? (
+                  <div className="mt-3 animate-in rounded-xl border border-emerald-100 bg-emerald-50/40 p-4 text-emerald-800 duration-200 fade-in slide-in-from-top-1 dark:border-emerald-950/40 dark:bg-emerald-950/10 dark:text-emerald-400">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
+                        <span className="text-sm font-semibold select-none">
+                          核销成功
+                        </span>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="size-5 rounded text-emerald-600/70 hover:bg-emerald-100 hover:text-emerald-800 dark:text-emerald-400/70 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300"
+                        onClick={() => setCheckinMsg(null)}
+                      >
+                        <X className="size-3" />
+                      </Button>
+                    </div>
+                    {checkinMsg.detail && (
+                      <div className="mt-3 flex flex-col gap-2 border-t border-emerald-100/50 pt-3 text-xs dark:border-emerald-950/20">
+                        <div className="flex items-center gap-2">
+                          <span className="min-w-16 text-emerald-600/80 dark:text-emerald-400/80">
+                            入场人员:
+                          </span>
+                          <span className="rounded bg-emerald-100/50 px-2 py-0.5 font-semibold text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-300">
+                            {checkinMsg.detail.userName}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="min-w-16 text-emerald-600/80 dark:text-emerald-400/80">
+                            对应活动:
+                          </span>
+                          <span className="line-clamp-1 rounded bg-emerald-100/50 px-2 py-0.5 text-left font-semibold text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-300">
+                            {checkinMsg.detail.eventTitle}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="min-w-16 text-emerald-600/80 dark:text-emerald-400/80">
+                            核销时间:
+                          </span>
+                          <span className="font-semibold text-emerald-700 dark:text-emerald-300">
+                            {checkinMsg.detail.checkinTime}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="mt-3 animate-in rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-destructive duration-200 fade-in slide-in-from-top-1">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="size-4" />
+                        <span className="text-sm font-semibold select-none">
+                          核销失败
+                        </span>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="size-5 rounded text-destructive/70 hover:bg-destructive/15 hover:text-destructive"
+                        onClick={() => setCheckinMsg(null)}
+                      >
+                        <X className="size-3" />
+                      </Button>
+                    </div>
+                    <p className="mt-2 pl-6 text-xs leading-relaxed text-destructive/90">
+                      {checkinMsg.text}
+                    </p>
+                  </div>
+                ))}
             </div>
 
             {/* 创建活动 */}
-            <div id="event-form-panel" className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <div
+              id="event-form-panel"
+              className="rounded-2xl border border-border bg-card p-6 shadow-sm"
+            >
               <h2 className="mb-5 text-base font-bold text-foreground">
                 {editingEventId ? "编辑活动内容" : "发布全新活动"}
               </h2>
@@ -996,7 +1060,7 @@ export default function Dashboard() {
                                 确认删除此活动吗?
                               </AlertDialogTitle>
                               <AlertDialogDescription>
-                                此操作无法撤销，这样做之后就不可挽回了。
+                                此操作无法撤销
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

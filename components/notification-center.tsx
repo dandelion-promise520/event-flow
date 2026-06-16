@@ -76,13 +76,13 @@ export default function NotificationCenter() {
           <Button
             variant="ghost"
             size="icon"
-            className="relative rounded-full hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
+            className="group relative rounded-full hover:bg-muted/80 text-muted-foreground hover:text-foreground active:scale-95 transition-all duration-200"
           >
-            <Bell className="size-5" />
+            <Bell className="size-5 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-105" />
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 flex size-2.5">
+              <span className="absolute top-1.5 right-1.5 flex size-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75" />
-                <span className="relative inline-flex rounded-full size-2.5 bg-destructive" />
+                <span className="relative inline-flex rounded-full size-2 bg-destructive ring-1.5 ring-background" />
               </span>
             )}
           </Button>
@@ -109,24 +109,35 @@ export default function NotificationCenter() {
             notifications.map((n) => (
               <div
                 key={n.id}
-                className={`p-3.5 text-xs transition-colors ${
-                  n.isRead ? "bg-card hover:bg-muted/30" : "bg-brand/10 hover:bg-brand/15 font-medium"
-                }`}
+                className="p-3.5 text-xs transition-colors hover:bg-muted/40 relative bg-card"
               >
-                <div className="flex gap-2.5 items-start">
+                <div className="flex gap-3 items-start">
                   {n.title.includes("核销") || n.title.includes("成功") ? (
-                    <MailOpen className="size-4 text-emerald-500 mt-0.5 shrink-0" />
+                    <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                      <Check className="size-4" />
+                    </div>
                   ) : (
-                    <AlertCircle className="size-4 text-amber-500 mt-0.5 shrink-0" />
+                    <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                      <AlertCircle className="size-4" />
+                    </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start gap-1 mb-1">
-                      <span className="text-foreground font-semibold truncate">{n.title}</span>
-                      <span className="text-[10px] text-muted-foreground shrink-0 mt-0.5">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className={`text-xs truncate ${n.isRead ? "text-muted-foreground font-normal" : "text-foreground font-semibold"}`}>
+                          {n.title}
+                        </span>
+                        {!n.isRead && (
+                          <span className="size-1.5 rounded-full bg-brand shrink-0" />
+                        )}
+                      </div>
+                      <span className="text-[10px] text-muted-foreground/60 shrink-0 font-medium">
                         {new Date(n.createdAt).toLocaleDateString()}
                       </span>
                     </div>
-                    <p className="text-muted-foreground leading-relaxed break-words">{n.content}</p>
+                    <p className={`text-xs leading-relaxed break-words ${n.isRead ? "text-muted-foreground/80" : "text-foreground/80"}`}>
+                      {n.content}
+                    </p>
                   </div>
                 </div>
               </div>

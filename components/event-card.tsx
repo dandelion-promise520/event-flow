@@ -18,9 +18,10 @@ export interface EventItem {
 
 interface EventProps {
   event: EventItem;
+  priority?: boolean;
 }
 
-export default function EventCard({ event }: EventProps) {
+export default function EventCard({ event, priority = false }: EventProps) {
   const percent = Math.min(100, Math.floor((event.bookedCount / event.capacity) * 100));
   const dateStr = new Date(event.startTime).toLocaleDateString("zh-CN", {
     month: "short",
@@ -38,6 +39,7 @@ export default function EventCard({ event }: EventProps) {
             alt={event.title}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority={priority}
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (

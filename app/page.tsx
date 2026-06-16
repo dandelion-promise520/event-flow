@@ -77,8 +77,8 @@ export default function Home() {
 
       {/* Event Grid */}
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredEvents.map((evt) => (
-          <EventCard key={evt.id} event={evt} />
+        {filteredEvents.map((evt, idx) => (
+          <EventCard key={evt.id} event={evt} priority={idx < 4} />
         ))}
       </div>
       {filteredEvents.length === 0 && (
