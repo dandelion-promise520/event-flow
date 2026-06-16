@@ -40,10 +40,17 @@ export async function POST(
       return NextResponse.json({ success: false, message: "评分必须在1到5之间" }, { status: 400 });
     }
 
-    // 强校验：是否购票且门票状态为 USED
-    const ticket = await prisma.ticket.findFirst({
-      where: { userId, eventId, status: "USED" },
-    });
+    // 并行检查用户是否购票核销以及是否已评价，消除数据库查询瀑布流
+    const [ticket, existing] = await Promise.all([
+      prisma.ticket.findFirst({
+        where: { userId, eventId, status: "USED" },
+      }),
+      prisma.review.findUnique({
+        where: {
+          userId_eventId: { userId, eventId },
+        },
+      })
+    ]);
 
     if (!ticket) {
       return NextResponse.json(
@@ -51,13 +58,6 @@ export async function POST(
         { status: 403 }
       );
     }
-
-    // 强校验：是否已经评价过
-    const existing = await prisma.review.findUnique({
-      where: {
-        userId_eventId: { userId, eventId },
-      },
-    });
 
     if (existing) {
       return NextResponse.json({ success: false, message: "您已为此活动撰写过评价" }, { status: 400 });

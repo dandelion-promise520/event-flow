@@ -1,6 +1,5 @@
 import test from "node:test";
 import assert from "node:assert";
-// @ts-ignore
 import { isTicketWithinDateRange } from "../lib/utils";
 
 test("isTicketWithinDateRange 过滤逻辑测试", () => {

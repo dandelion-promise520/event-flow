@@ -14,6 +14,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { FileUploader, type UploadFile } from "@/components/ui/file-uploader"
+import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -325,6 +326,7 @@ export default function Dashboard() {
       }
     } catch (err) {
       console.error(err)
+      toast.error("获取活动数据失败，请重试！")
     } finally {
       setLoading(false)
     }
@@ -406,19 +408,18 @@ export default function Dashboard() {
       })
       const data = await res.json()
       if (data.success) {
-        setBroadcastMsg("广播消息已成功群发给所有购票者！")
+        toast.success("广播消息已成功群发给所有购票者！")
         setBroadcastContent("")
-        setTimeout(() => {
-          setBroadcastEventId(null)
-          setBroadcastTitle("")
-          setBroadcastContent("")
-          setBroadcastMsg("")
-        }, 1500)
+        setBroadcastEventId(null)
+        setBroadcastTitle("")
+        setBroadcastMsg("")
       } else {
         setBroadcastMsg(data.message || "群发广播失败")
+        toast.error(data.message || "群发广播失败")
       }
     } catch {
       setBroadcastMsg("广播接口故障")
+      toast.error("网络故障，广播发送失败")
     } finally {
       setBroadcastLoading(false)
     }
@@ -502,14 +503,16 @@ export default function Dashboard() {
 
       const data = await res.json()
       if (data.success) {
-        setEventMsg(editingEventId ? "活动更新成功！" : "活动创建并发布成功！")
+        toast.success(editingEventId ? "活动更新成功！" : "活动创建并发布成功！")
         handleCancelEdit()
         loadDashboardData(user)
       } else {
         setEventMsg(data.message || (editingEventId ? "更新失败" : "创建失败"))
+        toast.error(data.message || (editingEventId ? "更新失败" : "创建失败"))
       }
     } catch {
       setEventMsg("接口故障")
+      toast.error("网络故障，操作失败")
     }
   }
 
@@ -553,8 +556,18 @@ export default function Dashboard() {
 
   const handleDeleteEvent = async (id: string) => {
     if (!user) return
-    await fetch(`/api/events?id=${id}`, { method: "DELETE" })
-    loadDashboardData(user)
+    try {
+      const res = await fetch(`/api/events?id=${id}`, { method: "DELETE" })
+      const data = await res.json()
+      if (data.success) {
+        toast.success("活动已成功删除")
+        loadDashboardData(user)
+      } else {
+        toast.error(data.message || "删除活动失败")
+      }
+    } catch {
+      toast.error("网络异常，删除活动失败")
+    }
   }
 
   if (loading || !user) {

@@ -35,10 +35,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, message: "参数缺失" }, { status: 400 });
     }
 
-    const event = await prisma.event.findUnique({
-      where: { id: eventId },
-      include: { tickets: true },
-    });
+    // 并行获取活动详情及判断用户是否已经订阅，消除数据库串行查询瀑布流
+    const [event, hasTicket] = await Promise.all([
+      prisma.event.findUnique({
+        where: { id: eventId },
+        include: { tickets: true },
+      }),
+      prisma.ticket.findFirst({
+        where: { userId, eventId },
+      })
+    ]);
 
     if (!event) {
       return NextResponse.json({ success: false, message: "活动未找到" }, { status: 404 });
@@ -49,10 +55,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, message: "活动名额已满" }, { status: 400 });
     }
 
-    // 检查是否已订阅过
-    const hasTicket = await prisma.ticket.findFirst({
-      where: { userId, eventId },
-    });
     if (hasTicket) {
       return NextResponse.json({ success: false, message: "您已报名该活动" }, { status: 400 });
     }

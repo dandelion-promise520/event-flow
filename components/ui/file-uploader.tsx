@@ -4,6 +4,7 @@ import * as React from "react"
 import { Upload, X, FileText, CheckCircle2, AlertCircle, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 export interface UploadFile {
   id: string
@@ -52,6 +53,7 @@ export function FileUploader({
   const handleFiles = React.useCallback(
     async (rawFiles: FileList) => {
       let filesArray = Array.from(rawFiles)
+      const initialCount = filesArray.length
 
       // 1. Accept type filter
       if (accept) {
@@ -67,13 +69,18 @@ export function FileUploader({
             return file.type === type
           })
         })
+
+        if (initialCount > 0 && filesArray.length === 0) {
+          toast.error(`文件格式不正确，仅支持: ${accept}`)
+          return
+        }
       }
 
       // 2. Max size filter
       filesArray = filesArray.filter((file) => {
         const sizeInMB = file.size / (1024 * 1024)
         if (sizeInMB > maxSize) {
-          alert(`文件 "${file.name}" 超过限制的 ${maxSize}MB`)
+          toast.error(`文件 "${file.name}" 超过限制的 ${maxSize}MB`)
           return false
         }
         return true
@@ -82,7 +89,7 @@ export function FileUploader({
       // 3. Max count filter
       if (maxCount && value.length + filesArray.length > maxCount) {
         filesArray = filesArray.slice(0, maxCount - value.length)
-        alert(`最多只能上传 ${maxCount} 个文件`)
+        toast.error(`最多只能上传 ${maxCount} 个文件`)
       }
 
       if (filesArray.length === 0) return
@@ -94,7 +101,7 @@ export function FileUploader({
           const hash = await calculateHash(file)
           const isDuplicate = value.some((f) => f.hash === hash)
           if (isDuplicate) {
-            alert(`文件 "${file.name}" 与上传列表中的现有文件完全一致，已自动过滤！`)
+            toast.warning(`文件 "${file.name}" 与上传列表中的现有文件完全一致，已自动过滤！`)
             continue
           }
           filesWithHash.push({ file, hash })
@@ -165,15 +172,19 @@ export function FileUploader({
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     setIsDragActive(true)
   }
 
-  const handleDragLeave = () => {
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
     setIsDragActive(false)
   }
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     setIsDragActive(false)
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleFiles(e.dataTransfer.files)
@@ -252,6 +263,7 @@ export function FileUploader({
                 {/* 缩略图预览 */}
                 <div className="h-10 w-10 rounded-lg bg-muted border overflow-hidden shrink-0 flex items-center justify-center relative">
                   {file.type.startsWith("image/") && file.url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={file.url}
                       alt={file.name}

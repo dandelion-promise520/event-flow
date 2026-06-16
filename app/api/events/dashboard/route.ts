@@ -19,14 +19,28 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: false, message: "无权访问此数据" }, { status: 403 });
     }
 
-    // 1. 获取活动列表，如果是 ADMIN 则获取全部，否则获取该组织者名下的活动
-    const events = await prisma.event.findMany({
-      where: organizer.role === "ADMIN" ? {} : { organizerId },
-      include: {
-        tickets: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    // 1. 并行获取活动列表和已售出的门票明细数据，消除串行查询瀑布流
+    const [events, tickets] = await Promise.all([
+      prisma.event.findMany({
+        where: organizer.role === "ADMIN" ? {} : { organizerId },
+        include: {
+          tickets: true,
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.ticket.findMany({
+        where: organizer.role === "ADMIN" ? {} : {
+          event: {
+            organizerId,
+          },
+        },
+        include: {
+          event: { select: { title: true } },
+          user: { select: { name: true, email: true } },
+        },
+        orderBy: { bookedAt: "desc" },
+      })
+    ]);
 
     const formattedEvents = events.map((e) => ({
       id: e.id,
@@ -39,20 +53,6 @@ export async function GET(req: Request) {
       soldCount: e.tickets.length,
       checkedInCount: e.tickets.filter((t) => t.status === "USED").length,
     }));
-
-    // 2. 获取已售出的门票明细数据，如果是 ADMIN 则获取全部，否则获取针对该组织者活动的门票
-    const tickets = await prisma.ticket.findMany({
-      where: organizer.role === "ADMIN" ? {} : {
-        event: {
-          organizerId,
-        },
-      },
-      include: {
-        event: { select: { title: true } },
-        user: { select: { name: true, email: true } },
-      },
-      orderBy: { bookedAt: "desc" },
-    });
 
     const formattedTickets = tickets.map((t) => ({
       id: t.id,

@@ -3,9 +3,11 @@
 import { useEffect, useState, use, useCallback } from "react";
 import { MapPin, Calendar, ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -31,6 +33,7 @@ export default function EventDetail({ params }: PageProps) {
       setEvent(current);
     } catch (err) {
       console.error(err);
+      toast.error("获取活动详情失败，请刷新重试！");
     } finally {
       setLoading(false);
     }
@@ -64,12 +67,15 @@ export default function EventDetail({ params }: PageProps) {
       if (data.success) {
         setSuccess(true);
         setMessage(`订票成功！专属核销码: ${data.ticket.ticketCode}`);
+        toast.success("订票成功！");
         fetchEvent();
       } else {
         setMessage(data.message || "订票失败，请重试");
+        toast.error(data.message || "订票失败，请重试");
       }
     } catch {
       setMessage("服务器异常，订票失败");
+      toast.error("服务器异常，订票失败");
     } finally {
       setBooking(false);
     }
@@ -100,9 +106,15 @@ export default function EventDetail({ params }: PageProps) {
 
       <div className="overflow-hidden rounded-3xl border border-border bg-card">
         {event.coverUrl && (
-          <div className="aspect-[2.39/1] w-full bg-muted overflow-hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={event.coverUrl} alt={event.title} className="h-full w-full object-cover" />
+          <div className="relative aspect-[2.39/1] w-full bg-muted overflow-hidden">
+            <Image
+              src={event.coverUrl}
+              alt={event.title}
+              fill
+              sizes="100vw"
+              priority
+              className="object-cover"
+            />
           </div>
         )}
 
