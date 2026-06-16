@@ -39,9 +39,9 @@ export default function Login() {
 
   return (
     <div className="flex min-h-[calc(100vh-64px)] items-center justify-center px-6 py-12">
-      <div className="w-full max-w-sm rounded-2xl border border-neutral-200 bg-white p-8 shadow-sm">
-        <h2 className="text-xl font-bold text-neutral-900 text-center">系统登录</h2>
-        <p className="mt-1.5 text-xs text-neutral-500 text-center">
+      <div className="w-full max-w-sm rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-zinc-900 p-8 shadow-sm">
+        <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 text-center">系统登录</h2>
+        <p className="mt-1.5 text-xs text-neutral-500 dark:text-neutral-400 text-center">
           请输入您的学生账号或主办方账号
         </p>
 
@@ -54,7 +54,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-white"
+                className="bg-white dark:bg-zinc-950"
               />
             </Field>
 
@@ -65,7 +65,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="bg-white"
+                className="bg-white dark:bg-zinc-950"
               />
             </Field>
 
@@ -84,7 +84,7 @@ export default function Login() {
           </FieldGroup>
         </form>
 
-        <div className="mt-6 border-t border-neutral-100 pt-6 text-center text-xs text-neutral-400">
+        <div className="mt-6 border-t border-neutral-100 dark:border-neutral-800 pt-6 text-center text-xs text-neutral-400">
           测试账号：学生 student@campus.com 密码 admin123 <br />
           主办方 organizer@campus.com 密码 admin123
         </div>

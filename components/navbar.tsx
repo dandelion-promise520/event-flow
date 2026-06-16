@@ -1,51 +1,99 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Calendar, LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import Link from "next/link"
+import { useEffect, useState } from "react"
+import { Calendar, LogOut, Moon, Sun } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
-import NotificationCenter from "./notification-center";
+import NotificationCenter from "./notification-center"
 
-export default function Navbar() {
-  const [user, setUser] = useState<{ name: string; role: string } | null>(null);
+import { useTheme } from "next-themes"
 
-  useEffect(() => {
-    const stored = localStorage.getItem("campus_user");
-    if (stored) {
-      setTimeout(() => {
-        setUser(JSON.parse(stored));
-      }, 0);
-    }
-  }, []);
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
-  const handleLogout = () => {
-    localStorage.removeItem("campus_user");
-    setUser(null);
-    window.location.href = "/";
-  };
+function ModeToggle() {
+  const { setTheme } = useTheme()
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[#e4e4e7] bg-[#fcfcfd]/80 backdrop-blur-md">
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button variant="outline" size="icon">
+            <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+            <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+            <span className="sr-only">主题切换</span>
+          </Button>
+        }
+      ></DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => setTheme("light")}>
+          亮色
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("dark")}>
+          暗色
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("system")}>
+          跟随系统
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+export default function Navbar() {
+  const [user, setUser] = useState<{ name: string; role: string } | null>(null)
+
+  useEffect(() => {
+    const stored = localStorage.getItem("campus_user")
+    if (stored) {
+      setTimeout(() => {
+        setUser(JSON.parse(stored))
+      }, 0)
+    }
+  }, [])
+
+  const handleLogout = () => {
+    localStorage.removeItem("campus_user")
+    setUser(null)
+    window.location.href = "/"
+  }
+
+  return (
+    <header className="sticky top-0 z-50 w-full border-b border-neutral-200 bg-[#fcfcfd]/80 backdrop-blur-md dark:border-neutral-800 dark:bg-zinc-950/80">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-        <Link href="/" className="flex items-center gap-2 font-bold text-lg text-black">
-          <Calendar className="h-5 w-5 text-indigo-600" />
-          <span>CampusEvent</span>
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-lg font-bold text-black dark:text-white"
+        >
+          <Calendar className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+          <span>EventFlow</span>
         </Link>
         <nav className="flex items-center gap-6">
-          <Link href="/" className="text-sm font-medium text-neutral-600 hover:text-black">
+          <ModeToggle />
+          <Link
+            href="/"
+            className="text-sm font-medium text-neutral-600 hover:text-black dark:text-neutral-400 dark:hover:text-white"
+          >
             活动探索
           </Link>
           {user ? (
             <>
               <NotificationCenter />
-              <Link href="/dashboard" className="text-sm font-medium text-neutral-600 hover:text-black">
+              <Link
+                href="/dashboard"
+                className="text-sm font-medium text-neutral-600 hover:text-black dark:text-neutral-400 dark:hover:text-white"
+              >
                 控制台 ({user.name})
               </Link>
               <Button
                 variant="ghost"
                 onClick={handleLogout}
-                className="flex items-center gap-1.5 text-sm font-medium text-red-600 hover:text-red-800 hover:bg-red-50/50"
+                className="flex items-center gap-1.5 text-sm font-medium text-red-600 hover:bg-red-50/50 hover:text-red-800 dark:text-red-400 dark:hover:bg-red-950/30 dark:hover:text-red-300"
               >
                 <LogOut data-icon="inline-start" />
                 退出
@@ -59,5 +107,5 @@ export default function Navbar() {
         </nav>
       </div>
     </header>
-  );
+  )
 }

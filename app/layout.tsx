@@ -28,8 +28,13 @@ export default function RootLayout({
         inter.variable
       )}
     >
-      <body className="min-h-screen bg-[#fcfcfd]">
-        <ThemeProvider>
+      <body className="min-h-screen bg-[#fcfcfd] dark:bg-background">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
           <Navbar />
           <main>{children}</main>
         </ThemeProvider>
