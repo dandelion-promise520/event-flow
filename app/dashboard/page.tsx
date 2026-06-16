@@ -50,6 +50,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import DashboardAnalytics from "@/components/dashboard-analytics"
+import type { EventData } from "@/lib/analytics-utils"
 
 const categories = [
   { label: "学术讲座", value: "学术讲座" },
@@ -654,8 +656,11 @@ export default function Dashboard() {
         </div>
       ) : (
         /* 主办方控制台 - 发布活动 & 核销门票 */
-        <div className="mt-10 grid gap-10 lg:grid-cols-12">
-          {/* 左侧：发布活动表单 & 扫码核销 */}
+        <div className="mt-10 flex flex-col gap-8">
+          <DashboardAnalytics events={createdEvents as unknown as EventData[]} tickets={dashboardTickets} />
+
+          <div className="grid gap-10 lg:grid-cols-12">
+            {/* 左侧：发布活动表单 & 扫码核销 */}
           <div className="flex flex-col gap-8 lg:col-span-5">
             {/* 活动核销 */}
             <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
@@ -1276,6 +1281,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+      </div>
       )}
 
       {/* 广播弹窗 */}
