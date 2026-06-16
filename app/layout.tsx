@@ -28,7 +28,7 @@ export default function RootLayout({
         inter.variable
       )}
     >
-      <body className="min-h-screen bg-[#fcfcfd] dark:bg-background">
+      <body className="min-h-screen bg-background text-foreground">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
