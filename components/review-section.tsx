@@ -4,6 +4,9 @@ import { useEffect, useState, useCallback } from "react";
 import { Star, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { FieldGroup, Field, FieldLabel } from "@/components/ui/field";
+import { cn } from "@/lib/utils";
 
 interface Review {
   id: string;
@@ -107,56 +110,64 @@ export default function ReviewSection({ eventId }: ReviewSectionProps) {
     : null;
 
   return (
-    <div className="space-y-6 mt-8 pt-8 border-t">
+    <div className="flex flex-col gap-6 mt-8 pt-8 border-t">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold flex items-center gap-2">
-          <MessageSquare className="h-5 w-5 text-primary" /> 活动评价 ({reviews.length})
+          <MessageSquare className="size-5 text-primary" /> 活动评价 ({reviews.length})
         </h3>
         {avgRating && (
-          <div className="flex items-center gap-1 text-sm bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full font-medium dark:bg-amber-950/20 dark:text-amber-400">
-            <Star className="h-4 w-4 fill-amber-500 stroke-amber-500" />
+          <Badge variant="secondary" className="gap-1 bg-amber-50 text-amber-700 hover:bg-amber-50/80 dark:bg-amber-950/20 dark:text-amber-400 border-transparent font-medium">
+            <Star className="size-4 fill-amber-500 stroke-amber-500" />
             平均分 {avgRating}
-          </div>
+          </Badge>
         )}
       </div>
 
       {/* 提交评价区域 */}
       {canReview && (
-        <form onSubmit={handleSubmit} className="bg-muted/30 p-4 rounded-lg border space-y-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 bg-muted/30 p-4 rounded-lg border">
           <div className="font-medium text-sm text-foreground">写下您的活动评价 (仅限参与者)</div>
           
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-muted-foreground mr-2">星级评分:</span>
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                type="button"
-                key={star}
-                onClick={() => setRating(star)}
-                onMouseEnter={() => setHoverRating(star)}
-                onMouseLeave={() => setHoverRating(0)}
-                className="transition-transform hover:scale-110"
-              >
-                <Star
-                  className={`h-5 w-5 ${
-                    star <= (hoverRating || rating)
-                      ? "fill-amber-400 stroke-amber-400"
-                      : "text-muted-foreground/30"
-                  }`}
-                />
-              </button>
-            ))}
-          </div>
+          <FieldGroup>
+            <Field>
+              <FieldLabel className="text-xs text-muted-foreground">星级评分</FieldLabel>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    type="button"
+                    key={star}
+                    onClick={() => setRating(star)}
+                    onMouseEnter={() => setHoverRating(star)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    className="transition-transform hover:scale-110"
+                  >
+                    <Star
+                      className={cn(
+                        "size-5",
+                        star <= (hoverRating || rating)
+                          ? "fill-amber-400 stroke-amber-400"
+                          : "text-muted-foreground/30"
+                      )}
+                    />
+                  </button>
+                ))}
+              </div>
+            </Field>
 
-          <Textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="请分享您对本次活动的真实看法，例如内容含金量、现场秩序等..."
-            required
-            className="bg-background"
-          />
+            <Field>
+              <FieldLabel className="sr-only">评价内容</FieldLabel>
+              <Textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="请分享您对本次活动的真实看法，例如内容含金量、现场秩序等..."
+                required
+                className="bg-background"
+              />
+            </Field>
+          </FieldGroup>
 
-          {errorMsg && <p className="text-xs text-red-500">{errorMsg}</p>}
-          {successMsg && <p className="text-xs text-green-500">{successMsg}</p>}
+          {errorMsg && <p className="text-xs text-destructive">{errorMsg}</p>}
+          {successMsg && <p className="text-xs text-emerald-600 dark:text-emerald-400">{successMsg}</p>}
 
           <div className="text-right">
             <Button type="submit" size="sm">提交评价</Button>
@@ -165,18 +176,18 @@ export default function ReviewSection({ eventId }: ReviewSectionProps) {
       )}
 
       {/* 评价列表展示 */}
-      <div className="space-y-4">
+      <div className="flex flex-col gap-4">
         {reviews.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">暂无评价，欢迎参与活动后留言评价！</p>
         ) : (
           reviews.map((r) => (
-            <div key={r.id} className="p-4 border rounded-lg space-y-2">
+            <div key={r.id} className="p-4 border rounded-lg flex flex-col gap-2">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 animate-none">
                   <span className="font-semibold text-foreground">{r.user?.name || "匿名用户"}</span>
-                  <span className="bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded scale-90 dark:bg-emerald-950/20 dark:text-emerald-400 font-bold">
+                  <Badge variant="secondary" className="scale-90 font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 border-transparent">
                     ✓ 已核销用户
-                  </span>
+                  </Badge>
                 </div>
                 <span>{new Date(r.createdAt).toLocaleString()}</span>
               </div>
@@ -185,9 +196,10 @@ export default function ReviewSection({ eventId }: ReviewSectionProps) {
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
-                    className={`h-3.5 w-3.5 ${
+                    className={cn(
+                      "size-3.5",
                       star <= r.rating ? "fill-amber-400 stroke-amber-400" : "text-muted-foreground/20"
-                    }`}
+                    )}
                   />
                 ))}
               </div>

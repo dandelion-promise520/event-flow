@@ -5,6 +5,7 @@ import EventCard, { EventItem } from "@/components/event-card"
 import { Search, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 
 export default function Home() {
   const [events, setEvents] = useState<EventItem[]>([])
@@ -36,10 +37,10 @@ export default function Home() {
     <div className="mx-auto max-w-7xl px-6 py-12">
       {/* Hero Section */}
       <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-linear-to-tr from-brand/5 via-background to-pink-500/5 dark:from-brand/10 dark:via-card dark:to-pink-500/5 py-12 text-center md:py-20">
-        <span className="inline-flex items-center gap-1 rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">
-          <Sparkles className="h-3 w-3" />
+        <Badge className="gap-1 bg-brand/10 text-brand hover:bg-brand/15 border-transparent">
+          <Sparkles className="size-3" />
           全新上线校园活动大厅
-        </span>
+        </Badge>
         <h1 className="mt-6 text-3xl font-extrabold tracking-tight text-foreground md:text-5xl">
           精彩校园活动，一指即达
         </h1>
@@ -49,7 +50,7 @@ export default function Home() {
 
         {/* Search Bar */}
         <div className="relative mx-auto mt-8 flex max-w-md items-center">
-          <Search className="absolute left-3.5 h-4 w-4 text-neutral-400" />
+          <Search className="absolute left-3.5 size-4 text-muted-foreground" />
           <Input
             type="text"
             placeholder="搜索感兴趣的活动..."

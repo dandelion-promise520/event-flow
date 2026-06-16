@@ -26,6 +26,7 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { FieldGroup, Field, FieldLabel } from "@/components/ui/field"
 import { Calendar } from "@/components/ui/calendar"
+import { Badge } from "@/components/ui/badge"
 import {
   Popover,
   PopoverContent,
@@ -559,7 +560,7 @@ export default function Dashboard() {
   if (loading || !user) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-foreground" />
+        <Loader2 className="size-6 animate-spin text-foreground" />
       </div>
     )
   }
@@ -587,9 +588,9 @@ export default function Dashboard() {
               >
                 <div>
                   <div className="flex items-start justify-between">
-                    <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">
+                    <Badge variant="secondary">
                       {t.event.category}
-                    </span>
+                    </Badge>
                     <span
                       className={`text-xs font-semibold ${
                         t.status === "UNUSED"
@@ -663,15 +664,14 @@ export default function Dashboard() {
                   }
                   className={cn(
                     "mt-3 transition-all duration-300",
-                    checkinMsg.type === "success"
-                      ? "border-emerald-100 bg-emerald-50/60 text-emerald-800 *:data-[slot=alert-description]:text-emerald-700 dark:border-emerald-950/40 dark:bg-emerald-950/10 dark:text-emerald-400 *:data-[slot=alert-description]:dark:text-emerald-400/90"
-                      : "border-rose-100 bg-rose-50/60 text-rose-800 *:data-[slot=alert-description]:text-rose-700 dark:border-rose-950/40 dark:bg-rose-950/10 dark:text-rose-400 *:data-[slot=alert-description]:dark:text-rose-400/90"
+                    checkinMsg.type === "success" &&
+                      "border-emerald-100 bg-emerald-50/60 text-emerald-800 *:data-[slot=alert-description]:text-emerald-700 dark:border-emerald-950/40 dark:bg-emerald-950/10 dark:text-emerald-400 *:data-[slot=alert-description]:dark:text-emerald-400/90"
                   )}
                 >
                   {checkinMsg.type === "success" ? (
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
                   ) : (
-                    <AlertCircle className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+                    <AlertCircle className="size-4" />
                   )}
                   <AlertTitle className="font-semibold select-none">
                     {checkinMsg.type === "success" ? "核销成功" : "核销失败"}
@@ -754,7 +754,7 @@ export default function Dashboard() {
                             !selectedDate && "text-muted-foreground/80"
                           )}
                         >
-                          <CalendarIcon className="h-4 w-4 text-muted-foreground/80" />
+                          <CalendarIcon className="size-4 text-muted-foreground/80" />
                           {selectedDate
                             ? format(selectedDate, "yyyy-MM-dd")
                             : "选择日期"}

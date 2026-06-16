@@ -4,6 +4,8 @@ import { useEffect, useState, use, useCallback } from "react";
 import { MapPin, Calendar, ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -76,7 +78,7 @@ export default function EventDetail({ params }: PageProps) {
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+        <Loader2 className="size-6 animate-spin text-primary" />
       </div>
     );
   }
@@ -92,7 +94,7 @@ export default function EventDetail({ params }: PageProps) {
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">
       <Link href="/" className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-foreground mb-8">
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft className="size-4" />
         返回大厅
       </Link>
 
@@ -105,15 +107,15 @@ export default function EventDetail({ params }: PageProps) {
         )}
 
         <div className="p-8">
-          <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">
+          <Badge className="bg-brand/10 text-brand hover:bg-brand/15 border-transparent">
             {event.category}
-          </span>
+          </Badge>
           <h1 className="mt-4 text-2xl md:text-3xl font-extrabold text-foreground">{event.title}</h1>
           
           <div className="mt-6 grid gap-4 border-y border-border/60 py-6 md:grid-cols-2">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-muted-foreground border border-border">
-                <Calendar className="h-5 w-5" />
+              <div className="flex size-10 items-center justify-center rounded-xl bg-muted text-muted-foreground border border-border">
+                <Calendar className="size-5" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground/80 font-semibold">开始时间</p>
@@ -121,8 +123,8 @@ export default function EventDetail({ params }: PageProps) {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-muted-foreground border border-border">
-                <MapPin className="h-5 w-5" />
+              <div className="flex size-10 items-center justify-center rounded-xl bg-muted text-muted-foreground border border-border">
+                <MapPin className="size-5" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground/80 font-semibold">活动地点</p>
@@ -146,10 +148,10 @@ export default function EventDetail({ params }: PageProps) {
 
             <div className="flex flex-col gap-2 min-w-[200px]">
               {success ? (
-                <div className="flex items-center gap-1.5 text-emerald-600 text-sm font-bold">
-                  <CheckCircle2 className="h-4 w-4" />
-                  <span>预约成功</span>
-                </div>
+                <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 border-transparent font-bold py-1.5 px-3">
+                  <CheckCircle2 className="size-4" />
+                  预约成功
+                </Badge>
               ) : (
                 <Button
                   disabled={event.bookedCount >= event.capacity || booking}
@@ -163,7 +165,7 @@ export default function EventDetail({ params }: PageProps) {
                 </Button>
               )}
               {message && (
-                <p className={`text-xs ${success ? "text-emerald-600" : "text-red-500"} mt-2`}>
+                <p className={cn("text-xs mt-2", success ? "text-emerald-600 dark:text-emerald-400" : "text-destructive")}>
                   {message}
                 </p>
               )}

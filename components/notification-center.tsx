@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Bell, Check, MailOpen, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface Notification {
   id: string;
@@ -16,7 +17,6 @@ export default function NotificationCenter() {
   const [user, setUser] = useState<{ id: string } | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
@@ -67,83 +67,73 @@ export default function NotificationCenter() {
     }
   }, []);
 
-  // 点击外部关闭弹窗
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   if (!user) return null;
 
   return (
-    <div className="relative" ref={dropdownRef}>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setOpen(!open)}
-        className="relative rounded-full hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <Bell className="h-5 w-5" />
-        {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
-          </span>
-        )}
-      </Button>
-
-      {open && (
-        <div className="absolute right-0 mt-2 w-80 bg-popover text-popover-foreground rounded-xl border border-border shadow-xl z-50 overflow-hidden animate-in fade-in-50 slide-in-from-top-1 duration-200">
-          <div className="p-3.5 border-b border-border flex items-center justify-between bg-muted/50">
-            <span className="font-semibold text-sm text-foreground/90">站内通知</span>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative rounded-full hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Bell className="size-5" />
             {unreadCount > 0 && (
-              <button
-                onClick={markAllAsRead}
-                className="text-xs text-brand hover:text-brand/80 transition-colors hover:underline flex items-center gap-1 font-medium"
-              >
-                <Check className="h-3.5 w-3.5" /> 全部标为已读
-              </button>
+              <span className="absolute top-1 right-1 flex size-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75" />
+                <span className="relative inline-flex rounded-full size-2.5 bg-destructive" />
+              </span>
             )}
-          </div>
+          </Button>
+        }
+      />
 
-          <div className="max-h-72 overflow-y-auto divide-y divide-border">
-            {notifications.length === 0 ? (
-              <div className="p-8 text-center text-xs text-neutral-400">暂无消息</div>
-            ) : (
-              notifications.map((n) => (
-                <div
-                  key={n.id}
-                  className={`p-3.5 text-xs transition-colors ${
-                    n.isRead ? "bg-card hover:bg-muted/30" : "bg-brand/10 hover:bg-brand/15 font-medium"
-                  }`}
-                >
-                  <div className="flex gap-2.5 items-start">
-                    {n.title.includes("核销") || n.title.includes("成功") ? (
-                      <MailOpen className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
-                    ) : (
-                      <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start gap-1 mb-1">
-                        <span className="text-foreground font-semibold truncate">{n.title}</span>
-                        <span className="text-[10px] text-neutral-400 shrink-0 mt-0.5">
-                          {new Date(n.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <p className="text-muted-foreground leading-relaxed break-words">{n.content}</p>
+      <PopoverContent align="end" className="w-80 p-0 overflow-hidden">
+        <div className="p-3.5 border-b border-border flex items-center justify-between bg-muted/50">
+          <span className="font-semibold text-sm text-foreground/90">站内通知</span>
+          {unreadCount > 0 && (
+            <button
+              onClick={markAllAsRead}
+              className="text-xs text-brand hover:text-brand/80 transition-colors hover:underline flex items-center gap-1 font-medium"
+            >
+              <Check className="size-3.5" /> 全部标为已读
+            </button>
+          )}
+        </div>
+
+        <div className="max-h-72 overflow-y-auto divide-y divide-border">
+          {notifications.length === 0 ? (
+            <div className="p-8 text-center text-xs text-muted-foreground">暂无消息</div>
+          ) : (
+            notifications.map((n) => (
+              <div
+                key={n.id}
+                className={`p-3.5 text-xs transition-colors ${
+                  n.isRead ? "bg-card hover:bg-muted/30" : "bg-brand/10 hover:bg-brand/15 font-medium"
+                }`}
+              >
+                <div className="flex gap-2.5 items-start">
+                  {n.title.includes("核销") || n.title.includes("成功") ? (
+                    <MailOpen className="size-4 text-emerald-500 mt-0.5 shrink-0" />
+                  ) : (
+                    <AlertCircle className="size-4 text-amber-500 mt-0.5 shrink-0" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start gap-1 mb-1">
+                      <span className="text-foreground font-semibold truncate">{n.title}</span>
+                      <span className="text-[10px] text-muted-foreground shrink-0 mt-0.5">
+                        {new Date(n.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
+                    <p className="text-muted-foreground leading-relaxed break-words">{n.content}</p>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
+              </div>
+            ))
+          )}
         </div>
-      )}
-    </div>
+      </PopoverContent>
+    </Popover>
   );
 }
