@@ -35,15 +35,15 @@ export default function Home() {
   return (
     <div className="mx-auto max-w-7xl px-6 py-12">
       {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-3xl border border-neutral-100 dark:border-neutral-800 bg-linear-to-tr from-indigo-50/50 via-white to-pink-50/30 dark:from-indigo-950/20 dark:via-zinc-900 dark:to-pink-950/10 py-12 text-center md:py-20">
-        <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 dark:bg-indigo-950/50 px-3 py-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+      <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-linear-to-tr from-brand/5 via-background to-pink-500/5 dark:from-brand/10 dark:via-card dark:to-pink-500/5 py-12 text-center md:py-20">
+        <span className="inline-flex items-center gap-1 rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">
           <Sparkles className="h-3 w-3" />
           全新上线校园活动大厅
         </span>
-        <h1 className="mt-6 text-3xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-100 md:text-5xl">
+        <h1 className="mt-6 text-3xl font-extrabold tracking-tight text-foreground md:text-5xl">
           精彩校园活动，一指即达
         </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-sm text-neutral-500 dark:text-neutral-400 md:text-base">
+        <p className="mx-auto mt-4 max-w-2xl text-sm text-muted-foreground md:text-base">
           极速报名你感兴趣的学术讲座、文体比赛与社团桌游。电子门票自动生成，入场模拟一键扫码核销。
         </p>
 
@@ -55,7 +55,7 @@ export default function Home() {
             placeholder="搜索感兴趣的活动..."
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            className="h-11 w-full rounded-full border border-neutral-200 dark:border-neutral-800 pr-4 pl-10 text-sm shadow-sm transition-all outline-none focus:border-neutral-400 dark:focus:border-neutral-700 bg-white dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100"
+            className="h-11 w-full rounded-full border border-border pr-4 pl-10 text-sm shadow-sm transition-all outline-none focus:border-brand/50 bg-background text-foreground"
           />
         </div>
       </div>
@@ -81,7 +81,7 @@ export default function Home() {
         ))}
       </div>
       {filteredEvents.length === 0 && (
-        <div className="mt-16 text-center text-sm text-neutral-500 dark:text-neutral-400">
+        <div className="mt-16 text-center text-sm text-muted-foreground">
           暂未发现符合条件的活动
         </div>
       )}
