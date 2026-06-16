@@ -10,6 +10,7 @@ import {
   Calendar as CalendarIcon,
   CheckCircle2,
   AlertCircle,
+  Pencil,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { FileUploader, type UploadFile } from "@/components/ui/file-uploader"
@@ -66,10 +67,12 @@ interface EventType {
   category: string
   location: string
   startTime: string
-  capacity?: number
+  capacity: number
   bookedCount?: number
   soldCount?: number
   checkedInCount?: number
+  description?: string
+  coverUrl?: string | null
 }
 
 interface TicketType {
@@ -104,6 +107,8 @@ export default function Dashboard() {
   const [category, setCategory] = useState("学术讲座")
   const [eventMsg, setEventMsg] = useState("")
   const [uploadedFiles, setUploadedFiles] = useState<UploadFile[]>([])
+  const [editingEventId, setEditingEventId] = useState<string | null>(null)
+  const [originalStartTime, setOriginalStartTime] = useState<string | null>(null)
 
   const handleImageUpload = async (
     file: UploadFile,
@@ -173,6 +178,15 @@ export default function Dashboard() {
       return
     }
     const tempStartTime = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}T${hour}:${minute}`
+    
+    // 如果是编辑模式，且时间等于原始时间，则不进行过去时间的校验
+    if (editingEventId && tempStartTime === originalStartTime) {
+      setEventMsg((prev) =>
+        prev === "活动开始时间不能早于当前时间" ? "" : prev
+      )
+      return
+    }
+
     const selectedDateTime = new Date(tempStartTime)
     if (selectedDateTime.getTime() - Date.now() < -60 * 1000) {
       setEventMsg("活动开始时间不能早于当前时间")
@@ -204,6 +218,61 @@ export default function Dashboard() {
     const m = minute || "00"
     setSelectedMinute(m)
     validateTime(selectedDate, selectedHour, m)
+  }
+
+  const handleStartEdit = (evt: EventType) => {
+    setEditingEventId(evt.id)
+    setOriginalStartTime(evt.startTime)
+    setTitle(evt.title)
+    setCategory(evt.category)
+    setDescription(evt.description || "")
+    setLocation(evt.location)
+    setCapacity(evt.capacity.toString())
+    
+    // 处理时间回显
+    const start = new Date(evt.startTime)
+    setSelectedDate(start)
+    setSelectedHour(String(start.getHours()).padStart(2, "0"))
+    setSelectedMinute(String(start.getMinutes()).padStart(2, "0"))
+
+    // 处理已上传封面回显
+    setUploadedFiles(
+      evt.coverUrl
+        ? [
+            {
+              id: "existing-cover",
+              name: "current-cover.png",
+              size: 0,
+              type: "image/png",
+              status: "success",
+              url: evt.coverUrl
+            }
+          ]
+        : []
+    )
+
+    setEventMsg("")
+
+    // 滚动到表单面板
+    const formPanel = document.getElementById("event-form-panel")
+    if (formPanel) {
+      formPanel.scrollIntoView({ behavior: "smooth" })
+    }
+  }
+
+  const handleCancelEdit = () => {
+    setEditingEventId(null)
+    setOriginalStartTime(null)
+    setTitle("")
+    setCategory(categories[0]?.value || "学术讲座")
+    setDescription("")
+    setLocation("")
+    setCapacity("50")
+    setSelectedDate(undefined)
+    setSelectedHour("09")
+    setSelectedMinute("00")
+    setUploadedFiles([])
+    setEventMsg("")
   }
 
   // 门票核销码状态
@@ -367,7 +436,7 @@ export default function Dashboard() {
     }, 0)
   }, [])
 
-  const handleCreateEvent = async (e: React.FormEvent) => {
+  const handleCreateOrUpdateEvent = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user) return
     setEventMsg("")
@@ -377,44 +446,66 @@ export default function Dashboard() {
       return
     }
 
-    const selectedDateTime = new Date(startTime)
-    if (selectedDateTime.getTime() - Date.now() < -60 * 1000) {
-      setEventMsg("活动开始时间不能早于当前时间")
-      return
-    }
-
     const coverUrl = uploadedFiles.find((f) => f.status === "success")?.url || null
 
     try {
-      const res = await fetch("/api/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          description,
-          coverUrl,
-          location,
-          startTime,
-          endTime,
-          capacity,
-          category,
-          organizerId: user.id,
-        }),
-      })
+      let res
+      if (editingEventId) {
+        // 仅当时间被改动时，才做时间是否为过去的校验
+        if (startTime !== originalStartTime) {
+          const selectedDateTime = new Date(startTime)
+          if (selectedDateTime.getTime() - Date.now() < -60 * 1000) {
+            setEventMsg("活动开始时间不能早于当前时间")
+            return
+          }
+        }
+
+        res = await fetch(`/api/events?id=${editingEventId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title,
+            description,
+            coverUrl,
+            location,
+            startTime,
+            endTime,
+            capacity,
+            category,
+          }),
+        })
+      } else {
+        // 仅当新建活动时校验开始时间不能早于当前时间
+        const selectedDateTime = new Date(startTime)
+        if (selectedDateTime.getTime() - Date.now() < -60 * 1000) {
+          setEventMsg("活动开始时间不能早于当前时间")
+          return
+        }
+
+        res = await fetch("/api/events", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title,
+            description,
+            coverUrl,
+            location,
+            startTime,
+            endTime,
+            capacity,
+            category,
+            organizerId: user.id,
+          }),
+        })
+      }
+
       const data = await res.json()
       if (data.success) {
-        setEventMsg("活动创建并发布成功！")
-        // 清空表单
-        setTitle("")
-        setDescription("")
-        setLocation("")
-        setSelectedDate(undefined)
-        setSelectedHour("09")
-        setSelectedMinute("00")
-        setUploadedFiles([])
+        setEventMsg(editingEventId ? "活动更新成功！" : "活动创建并发布成功！")
+        handleCancelEdit()
         loadDashboardData(user)
       } else {
-        setEventMsg(data.message || "创建失败")
+        setEventMsg(data.message || (editingEventId ? "更新失败" : "创建失败"))
       }
     } catch {
       setEventMsg("接口故障")
@@ -591,11 +682,11 @@ export default function Dashboard() {
             </div>
 
             {/* 创建活动 */}
-            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <div id="event-form-panel" className="rounded-2xl border border-border bg-card p-6 shadow-sm">
               <h2 className="mb-5 text-base font-bold text-foreground">
-                发布全新活动
+                {editingEventId ? "编辑活动内容" : "发布全新活动"}
               </h2>
-              <form onSubmit={handleCreateEvent}>
+              <form onSubmit={handleCreateOrUpdateEvent}>
                 <FieldGroup>
                   <Field>
                     <FieldLabel>活动名称</FieldLabel>
@@ -768,17 +859,29 @@ export default function Dashboard() {
                     </p>
                   )}
 
-                  <Button
-                    type="submit"
-                    className="h-10 w-full cursor-pointer font-semibold"
-                    disabled={
-                      eventMsg === "活动开始时间不能早于当前时间" ||
-                      !selectedDate
-                    }
-                  >
-                    <Plus data-icon="inline-start" />
-                    确认发布活动
-                  </Button>
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      type="submit"
+                      className="h-10 w-full cursor-pointer font-semibold"
+                      disabled={
+                        !selectedDate ||
+                        eventMsg === "活动开始时间不能早于当前时间"
+                      }
+                    >
+                      {!editingEventId && <Plus data-icon="inline-start" />}
+                      {editingEventId ? "保存修改" : "确认发布活动"}
+                    </Button>
+                    {editingEventId && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleCancelEdit}
+                        className="h-10 w-full cursor-pointer font-semibold"
+                      >
+                        取消编辑
+                      </Button>
+                    )}
+                  </div>
                 </FieldGroup>
               </form>
             </div>
@@ -837,6 +940,16 @@ export default function Dashboard() {
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleStartEdit(evt)}
+                          className="flex h-8 items-center gap-1 px-3 text-[11px] font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
+                        >
+                          <Pencil className="h-3 w-3" />
+                          编辑活动
+                        </Button>
                         <Button
                           type="button"
                           variant="outline"
