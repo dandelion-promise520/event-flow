@@ -410,17 +410,19 @@ export default function Dashboard() {
   if (loading || !user) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-neutral-900 dark:text-white" />
+        <Loader2 className="h-6 w-6 animate-spin text-foreground" />
       </div>
     )
   }
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-12">
-      <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-6">
+      <div className="flex items-center justify-between border-b border-border/60 pb-6">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">个人控制台</h1>
-          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+          <h1 className="text-2xl font-bold text-foreground">
+            个人控制台
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             欢迎回来，{user.name} ({user.role === "USER" ? "学生" : "主办方"})
           </p>
         </div>
@@ -429,44 +431,46 @@ export default function Dashboard() {
       {user.role === "USER" ? (
         /* 学生控制台 - 查看电子票根 */
         <div className="mt-10">
-          <h2 className="text-lg font-bold text-neutral-900 dark:text-white">我的活动门票</h2>
+          <h2 className="text-lg font-bold text-foreground">
+            我的活动门票
+          </h2>
           <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {tickets.map((t) => (
               <div
                 key={t.id}
-                className="relative flex flex-col justify-between rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-zinc-900 p-6 shadow-sm"
+                className="relative flex flex-col justify-between rounded-2xl border border-border bg-card p-6 shadow-sm"
               >
                 <div>
                   <div className="flex items-start justify-between">
-                    <span className="rounded-full border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-zinc-800 px-2 py-0.5 text-xs font-semibold text-neutral-500 dark:text-neutral-400">
+                    <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">
                       {t.event.category}
                     </span>
                     <span
                       className={`text-xs font-semibold ${
                         t.status === "UNUSED"
-                          ? "text-neutral-900 dark:text-neutral-100"
-                          : "text-neutral-400 dark:text-neutral-500"
+                          ? "text-foreground"
+                          : "text-muted-foreground/80"
                       }`}
                     >
                       {t.status === "UNUSED" ? "● 待核销" : "● 已使用"}
                     </span>
                   </div>
-                  <h3 className="mt-3 line-clamp-1 font-bold text-neutral-900 dark:text-white">
+                  <h3 className="mt-3 line-clamp-1 font-bold text-foreground">
                     {t.event.title}
                   </h3>
-                  <p className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+                  <p className="mt-2 text-xs text-muted-foreground">
                     地点: {t.event.location}
                   </p>
-                  <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     时间: {new Date(t.event.startTime).toLocaleString("zh-CN")}
                   </p>
                 </div>
 
-                <div className="-mx-6 mt-6 -mb-6 flex flex-col gap-2 rounded-b-2xl border-t border-dashed border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-zinc-950 p-6 pt-4">
-                  <span className="text-[10px] font-bold tracking-wider text-neutral-400 dark:text-neutral-500">
+                <div className="-mx-6 mt-6 -mb-6 flex flex-col gap-2 rounded-b-2xl border-t border-dashed border-border bg-muted p-6 pt-4">
+                  <span className="text-[10px] font-bold tracking-wider text-muted-foreground/80">
                     电子入场密钥 (核销码)
                   </span>
-                  <span className="font-mono text-sm font-bold text-neutral-800 dark:text-neutral-200 select-all">
+                  <span className="font-mono text-sm font-bold text-foreground/90 select-all">
                     {t.ticketCode}
                   </span>
                 </div>
@@ -474,7 +478,7 @@ export default function Dashboard() {
             ))}
           </div>
           {tickets.length === 0 && (
-            <p className="mt-8 text-center text-sm text-neutral-400 dark:text-neutral-500">
+            <p className="mt-8 text-center text-sm text-muted-foreground/80">
               目前还没有订购任何活动门票
             </p>
           )}
@@ -485,8 +489,8 @@ export default function Dashboard() {
           {/* 左侧：发布活动表单 & 扫码核销 */}
           <div className="flex flex-col gap-8 lg:col-span-5">
             {/* 活动核销 */}
-            <div className="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-zinc-900 p-6 shadow-sm">
-              <h2 className="text-base font-bold text-neutral-900 dark:text-white">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+              <h2 className="text-base font-bold text-foreground">
                 电子门票现场核销
               </h2>
               <form
@@ -498,7 +502,7 @@ export default function Dashboard() {
                   placeholder="输入门票代码 (e.g. EVT-...)"
                   value={ticketCodeInput}
                   onChange={(e) => setTicketCodeInput(e.target.value)}
-                  className="h-10 flex-1 bg-white dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100"
+                  className="h-10 flex-1 bg-background text-foreground"
                 />
                 <Button
                   type="submit"
@@ -533,8 +537,8 @@ export default function Dashboard() {
             </div>
 
             {/* 创建活动 */}
-            <div className="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-zinc-900 p-6 shadow-sm">
-              <h2 className="mb-5 text-base font-bold text-neutral-900 dark:text-white">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+              <h2 className="mb-5 text-base font-bold text-foreground">
                 发布全新活动
               </h2>
               <form onSubmit={handleCreateEvent}>
@@ -546,7 +550,7 @@ export default function Dashboard() {
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       required
-                      className="bg-white dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100"
+                      className="bg-background text-foreground"
                     />
                   </Field>
 
@@ -557,7 +561,7 @@ export default function Dashboard() {
                       onValueChange={(val) => setCategory(val || "")}
                       items={categories}
                     >
-                      <SelectTrigger className="w-full bg-white dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100">
+                      <SelectTrigger className="w-full bg-background text-foreground">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -579,7 +583,7 @@ export default function Dashboard() {
                       onChange={(e) => setDescription(e.target.value)}
                       required
                       rows={3}
-                      className="bg-white dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100"
+                      className="bg-background text-foreground"
                     />
                   </Field>
 
@@ -589,17 +593,18 @@ export default function Dashboard() {
                       <Popover>
                         <PopoverTrigger
                           className={cn(
-                            "flex h-8 w-full cursor-pointer items-center justify-start gap-1.5 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-zinc-950 py-2 pr-2 pl-2.5 text-left text-xs whitespace-nowrap outline-hidden transition-colors select-none hover:bg-neutral-50 dark:hover:bg-zinc-900 text-neutral-900 dark:text-neutral-100",
-                            !selectedDate && "text-muted-foreground dark:text-neutral-500"
+                            "flex h-8 w-full cursor-pointer items-center justify-start gap-1.5 rounded-lg border border-border bg-background py-2 pr-2 pl-2.5 text-left text-xs whitespace-nowrap text-foreground outline-hidden transition-colors select-none hover:bg-muted",
+                            !selectedDate &&
+                              "text-muted-foreground/80"
                           )}
                         >
-                          <CalendarIcon className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
+                          <CalendarIcon className="h-4 w-4 text-muted-foreground/80" />
                           {selectedDate
                             ? format(selectedDate, "yyyy-MM-dd")
                             : "选择日期"}
                         </PopoverTrigger>
                         <PopoverContent
-                          className="w-auto rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-zinc-950 p-0 shadow-md"
+                          className="w-auto rounded-lg border border-border bg-popover p-0 shadow-md"
                           align="start"
                         >
                           <Calendar
@@ -621,10 +626,10 @@ export default function Dashboard() {
                           value={selectedHour}
                           onValueChange={handleHourChange}
                         >
-                          <SelectTrigger className="h-8 w-20 bg-white dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100 text-xs">
+                          <SelectTrigger className="h-8 w-20 bg-background text-xs text-foreground">
                             <SelectValue placeholder="时" />
                           </SelectTrigger>
-                          <SelectContent className="max-h-60 overflow-y-auto rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-zinc-950 shadow-md">
+                          <SelectContent className="max-h-60 overflow-y-auto rounded-lg border border-border bg-popover shadow-md">
                             <SelectGroup>
                               {Array.from({ length: 24 }, (_, i) =>
                                 String(i).padStart(2, "0")
@@ -636,15 +641,17 @@ export default function Dashboard() {
                             </SelectGroup>
                           </SelectContent>
                         </Select>
-                        <span className="text-xs text-neutral-400 dark:text-neutral-500">:</span>
+                        <span className="text-xs text-muted-foreground/80">
+                          :
+                        </span>
                         <Select
                           value={selectedMinute}
                           onValueChange={handleMinuteChange}
                         >
-                          <SelectTrigger className="h-8 w-20 bg-white dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100 text-xs">
+                          <SelectTrigger className="h-8 w-20 bg-background text-xs text-foreground">
                             <SelectValue placeholder="分" />
                           </SelectTrigger>
-                          <SelectContent className="max-h-60 overflow-y-auto rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-zinc-950 shadow-md">
+                          <SelectContent className="max-h-60 overflow-y-auto rounded-lg border border-border bg-popover shadow-md">
                             <SelectGroup>
                               {Array.from({ length: 60 }, (_, i) =>
                                 String(i).padStart(2, "0")
@@ -668,7 +675,7 @@ export default function Dashboard() {
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
                         required
-                        className="h-8 bg-white dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100 text-xs"
+                        className="h-8 bg-background text-xs text-foreground"
                       />
                     </Field>
                     <Field>
@@ -678,7 +685,7 @@ export default function Dashboard() {
                         value={capacity}
                         onChange={(e) => setCapacity(e.target.value)}
                         required
-                        className="h-8 bg-white dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100 text-xs"
+                        className="h-8 bg-background text-xs text-foreground"
                       />
                     </Field>
                   </div>
@@ -713,33 +720,33 @@ export default function Dashboard() {
           </div>
 
           {/* 右侧：选项卡面板 */}
-          <div className="flex min-h-125 flex-col rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-zinc-900 p-6 shadow-sm lg:col-span-7">
+          <div className="flex min-h-125 flex-col rounded-2xl border border-border bg-card p-6 shadow-sm lg:col-span-7">
             {/* Tabs Header */}
-            <div className="flex gap-6 border-b border-neutral-100 dark:border-neutral-800 pb-3">
+            <div className="flex gap-6 border-b border-border/60 pb-3">
               <button
                 onClick={() => setActiveTab("events")}
                 className={`relative pb-2 text-sm font-bold transition-all ${
                   activeTab === "events"
-                    ? "text-neutral-900 dark:text-white"
-                    : "text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"
+                    ? "text-foreground"
+                    : "text-muted-foreground/80 hover:text-foreground"
                 }`}
               >
                 活动管理
                 {activeTab === "events" && (
-                  <span className="absolute right-0 bottom-0 left-0 h-0.5 rounded-full bg-neutral-900 dark:bg-white" />
+                  <span className="absolute right-0 bottom-0 left-0 h-0.5 rounded-full bg-foreground" />
                 )}
               </button>
               <button
                 onClick={() => setActiveTab("tickets")}
                 className={`relative pb-2 text-sm font-bold transition-all ${
                   activeTab === "tickets"
-                    ? "text-neutral-900 dark:text-white"
-                    : "text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-400"
+                    ? "text-foreground"
+                    : "text-muted-foreground/80 hover:text-foreground"
                 }`}
               >
                 门票核销明细表
                 {activeTab === "tickets" && (
-                  <span className="absolute right-0 bottom-0 left-0 h-0.5 rounded-full bg-neutral-900 dark:bg-white" />
+                  <span className="absolute right-0 bottom-0 left-0 h-0.5 rounded-full bg-foreground" />
                 )}
               </button>
             </div>
@@ -748,17 +755,17 @@ export default function Dashboard() {
             <div className="mt-4 flex-1">
               {activeTab === "events" ? (
                 /* 活动管理列表 */
-                <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
+                <div className="divide-y divide-border">
                   {createdEvents.map((evt) => (
                     <div
                       key={evt.id}
                       className="flex items-center justify-between py-4 first:pt-0 last:pb-0"
                     >
                       <div>
-                        <h3 className="text-sm font-bold text-neutral-800 dark:text-neutral-100">
+                        <h3 className="text-sm font-bold text-foreground/90">
                           {evt.title}
                         </h3>
-                        <p className="mt-1 text-[11px] text-neutral-400 dark:text-neutral-500">
+                        <p className="mt-1 text-[11px] text-muted-foreground/80">
                           地点: {evt.location} | 容量: {evt.capacity} 人 | 已售:{" "}
                           {evt.bookedCount} 张 | 已核销:{" "}
                           {evt.checkedInCount || 0} 张
@@ -775,7 +782,7 @@ export default function Dashboard() {
                             setBroadcastContent("")
                             setBroadcastMsg("")
                           }}
-                          className="flex h-8 items-center gap-1 px-3 text-[11px] font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-zinc-800"
+                          className="flex h-8 items-center gap-1 px-3 text-[11px] font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
                         >
                           <Megaphone className="h-3 w-3" />
                           群发消息
@@ -784,7 +791,7 @@ export default function Dashboard() {
                           variant="outline"
                           size="icon"
                           onClick={() => handleDeleteEvent(evt.id)}
-                          className="h-8 w-8 text-neutral-400 dark:text-neutral-500 hover:border-red-200 dark:hover:border-red-900 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 dark:hover:text-red-400"
+                          className="h-8 w-8 text-muted-foreground/80 hover:border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -792,7 +799,7 @@ export default function Dashboard() {
                     </div>
                   ))}
                   {createdEvents.length === 0 && (
-                    <p className="py-8 text-center text-xs text-neutral-400">
+                    <p className="py-8 text-center text-xs text-muted-foreground/80">
                       目前未发布任何活动
                     </p>
                   )}
@@ -801,27 +808,27 @@ export default function Dashboard() {
                 /* 门票核销明细表 */
                 <div className="space-y-4">
                   {/* 筛选与导出栏 */}
-                  <div className="flex flex-col justify-between gap-3 rounded-xl border border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 dark:bg-zinc-950/50 p-3 md:flex-row md:items-center">
+                  <div className="flex flex-col justify-between gap-3 rounded-xl border border-border/60 bg-muted/50 p-3 md:flex-row md:items-center">
                     <div className="flex flex-wrap items-center gap-2">
                       <Input
                         type="text"
                         placeholder="搜索购票人姓名/邮箱/票号"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="h-8 w-full bg-white dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100 text-[11px] sm:w-48"
+                        className="h-8 w-full bg-background text-[11px] text-foreground sm:w-48"
                       />
                       <Select
                         value={eventFilter}
                         onValueChange={(val) => setEventFilter(val || "all")}
                       >
-                        <SelectTrigger className="h-8 max-w-xs min-w-44 bg-white dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100 text-[11px]">
+                        <SelectTrigger className="h-8 max-w-xs min-w-44 bg-background text-[11px] text-foreground">
                           <SelectValue placeholder="所有活动">
                             {eventFilter === "all" ? "所有活动" : eventFilter}
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent
                           alignItemWithTrigger={false}
-                          className="z-50 max-h-60 w-auto max-w-xs min-w-55 overflow-y-auto rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-zinc-950 shadow-md sm:max-w-md"
+                          className="z-50 max-h-60 w-auto max-w-xs min-w-55 overflow-y-auto rounded-lg border border-border bg-popover shadow-md sm:max-w-md"
                         >
                           <SelectGroup>
                             <SelectItem value="all">所有活动</SelectItem>
@@ -839,7 +846,7 @@ export default function Dashboard() {
                         value={statusFilter}
                         onValueChange={(val) => setStatusFilter(val || "all")}
                       >
-                        <SelectTrigger className="h-8 w-28 bg-white dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100 text-[11px]">
+                        <SelectTrigger className="h-8 w-28 bg-background text-[11px] text-foreground">
                           <SelectValue placeholder="所有状态">
                             {statusFilter === "all"
                               ? "所有状态"
@@ -850,7 +857,7 @@ export default function Dashboard() {
                                   : "已取消"}
                           </SelectValue>
                         </SelectTrigger>
-                        <SelectContent className="rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-zinc-950 shadow-md">
+                        <SelectContent className="rounded-lg border border-border bg-popover shadow-md">
                           <SelectGroup>
                             <SelectItem value="all">所有状态</SelectItem>
                             <SelectItem value="UNUSED">未使用</SelectItem>
@@ -864,11 +871,12 @@ export default function Dashboard() {
                       <Popover>
                         <PopoverTrigger
                           className={cn(
-                            "flex h-8 items-center justify-start gap-1.5 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-zinc-950 py-2 pr-2 pl-2.5 text-xs text-left whitespace-nowrap transition-colors outline-hidden select-none hover:bg-neutral-50 dark:hover:bg-zinc-900 cursor-pointer text-neutral-700 dark:text-neutral-300 min-w-44",
-                            !dateRange?.from && "text-neutral-400 dark:text-neutral-500"
+                            "flex h-8 min-w-44 cursor-pointer items-center justify-start gap-1.5 rounded-lg border border-border bg-background py-2 pr-2 pl-2.5 text-left text-xs whitespace-nowrap text-muted-foreground outline-hidden transition-colors select-none hover:bg-muted",
+                            !dateRange?.from &&
+                              "text-muted-foreground/80"
                           )}
                         >
-                          <CalendarIcon className="h-3.5 w-3.5 text-neutral-400 dark:text-neutral-500" />
+                          <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground/80" />
                           {dateRange?.from ? (
                             dateRange.to ? (
                               <>
@@ -883,7 +891,7 @@ export default function Dashboard() {
                           )}
                         </PopoverTrigger>
                         <PopoverContent
-                          className="w-auto p-0 bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-neutral-800 shadow-md rounded-lg"
+                          className="w-auto rounded-lg border border-border bg-popover p-0 shadow-md"
                           align="start"
                         >
                           <Calendar
@@ -891,7 +899,7 @@ export default function Dashboard() {
                             selected={dateRange}
                             onSelect={setDateRange}
                             locale={zhCN}
-                            className="dark:bg-zinc-950 dark:text-neutral-100"
+                            className="bg-popover text-foreground"
                           />
                         </PopoverContent>
                       </Popover>
@@ -899,7 +907,7 @@ export default function Dashboard() {
                         <Button
                           variant="ghost"
                           onClick={() => setDateRange(undefined)}
-                          className="h-8 px-2 text-[11px] text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-zinc-800 cursor-pointer"
+                          className="h-8 cursor-pointer px-2 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground"
                         >
                           清除日期
                         </Button>
@@ -909,7 +917,7 @@ export default function Dashboard() {
                     <Button
                       onClick={handleExportCSV}
                       variant="outline"
-                      className="flex h-8 w-fit items-center gap-1 self-end border-neutral-300 dark:border-neutral-800 px-3 text-[11px] font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-zinc-800 md:self-auto"
+                      className="flex h-8 w-fit items-center gap-1 self-end border-border px-3 text-[11px] font-semibold text-muted-foreground hover:bg-muted md:self-auto"
                     >
                       <Download className="h-3.5 w-3.5" />
                       导出 CSV 数据
@@ -917,10 +925,10 @@ export default function Dashboard() {
                   </div>
 
                   {/* 门票明细数据表格 */}
-                  <div className="overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-800">
+                  <div className="overflow-x-auto rounded-xl border border-border">
                     <table className="w-full border-collapse text-left">
                       <thead>
-                        <tr className="border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/70 dark:bg-zinc-950/70 text-[10px] font-bold tracking-wider text-neutral-500 dark:text-neutral-400 uppercase">
+                        <tr className="border-b border-border bg-muted/70 text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
                           <th className="p-3">购票人</th>
                           <th className="p-3">电子票号</th>
                           <th className="p-3">活动名称</th>
@@ -928,25 +936,25 @@ export default function Dashboard() {
                           <th className="p-3">订票时间</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800 text-xs text-neutral-700 dark:text-neutral-300">
+                      <tbody className="divide-y divide-border text-xs text-muted-foreground">
                         {filteredTickets.map((t) => (
                           <tr
                             key={t.id}
-                            className="transition-colors hover:bg-neutral-50/30 dark:hover:bg-zinc-800/30"
+                            className="transition-colors hover:bg-muted/30"
                           >
                             <td className="p-3">
-                              <div className="font-bold text-neutral-800 dark:text-neutral-100">
+                              <div className="font-bold text-foreground/90">
                                 {t.userName}
                               </div>
-                              <div className="mt-0.5 text-[10px] text-neutral-400 dark:text-neutral-500">
+                              <div className="mt-0.5 text-[10px] text-muted-foreground/80">
                                 {t.userEmail}
                               </div>
                             </td>
-                            <td className="p-3 font-mono text-neutral-600 dark:text-neutral-400 select-all">
+                            <td className="p-3 font-mono text-muted-foreground select-all">
                               {t.ticketCode}
                             </td>
                             <td
-                              className="max-w-35 truncate p-3 font-medium text-neutral-700 dark:text-neutral-350"
+                              className="max-w-35 truncate p-3 font-medium text-foreground/80"
                               title={t.eventTitle}
                             >
                               {t.eventTitle}
@@ -955,10 +963,10 @@ export default function Dashboard() {
                               <span
                                 className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${
                                   t.status === "USED"
-                                    ? "border border-emerald-100 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400"
+                                    ? "border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                                     : t.status === "UNUSED"
-                                      ? "border border-border dark:border-neutral-800 bg-secondary text-secondary-foreground"
-                                      : "border border-red-100 dark:border-red-900 bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400"
+                                      ? "border border-border bg-secondary text-secondary-foreground"
+                                      : "border border-destructive/30 bg-destructive/10 text-destructive"
                                 }`}
                               >
                                 {t.status === "USED"
@@ -968,7 +976,7 @@ export default function Dashboard() {
                                     : "已取消"}
                               </span>
                             </td>
-                            <td className="p-3 text-[10px] text-neutral-400 dark:text-neutral-500">
+                            <td className="p-3 text-[10px] text-muted-foreground/80">
                               {new Date(t.bookedAt).toLocaleString("zh-CN")}
                             </td>
                           </tr>
@@ -977,7 +985,7 @@ export default function Dashboard() {
                           <tr>
                             <td
                               colSpan={5}
-                              className="p-8 text-center text-neutral-400"
+                              className="p-8 text-center text-muted-foreground/80"
                             >
                               暂无匹配的门票销售记录
                             </td>
@@ -996,15 +1004,17 @@ export default function Dashboard() {
       {/* 广播弹窗 */}
       {broadcastEventId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md animate-in rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-zinc-900 p-6 shadow-xl duration-200 fade-in zoom-in">
-            <h3 className="text-lg font-bold text-neutral-900 dark:text-white">群发广播通知</h3>
-            <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+          <div className="w-full max-w-md animate-in rounded-2xl border border-border bg-card p-6 shadow-xl duration-200 fade-in zoom-in">
+            <h3 className="text-lg font-bold text-foreground">
+              群发广播通知
+            </h3>
+            <p className="mt-1 text-xs text-muted-foreground">
               向所有订购该活动门票的用户发送站内信通知。
             </p>
 
             <form onSubmit={handleSendBroadcast} className="mt-4 space-y-4">
               <div>
-                <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">
+                <label className="text-xs font-bold text-foreground/80">
                   通知标题
                 </label>
                 <Input
@@ -1013,11 +1023,11 @@ export default function Dashboard() {
                   value={broadcastTitle}
                   onChange={(e) => setBroadcastTitle(e.target.value)}
                   required
-                  className="mt-1 bg-white dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100"
+                  className="mt-1 bg-background text-foreground"
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-neutral-700 dark:text-neutral-300">
+                <label className="text-xs font-bold text-foreground/80">
                   通知内容
                 </label>
                 <Textarea
@@ -1026,13 +1036,13 @@ export default function Dashboard() {
                   onChange={(e) => setBroadcastContent(e.target.value)}
                   required
                   rows={4}
-                  className="mt-1 bg-white dark:bg-zinc-950 text-neutral-900 dark:text-neutral-100"
+                  className="mt-1 bg-background text-foreground"
                 />
               </div>
 
               {broadcastMsg && (
                 <p
-                  className={`text-xs font-semibold ${broadcastMsg.includes("成功") ? "text-emerald-600" : "text-red-600"}`}
+                  className={`text-xs font-semibold ${broadcastMsg.includes("成功") ? "text-emerald-600" : "text-destructive"}`}
                 >
                   {broadcastMsg}
                 </p>
@@ -1056,7 +1066,7 @@ export default function Dashboard() {
                 <Button
                   type="submit"
                   disabled={broadcastLoading}
-                  className="h-9 bg-neutral-900 px-4 text-xs text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-100"
+                  className="h-9 bg-brand px-4 text-xs text-brand-foreground hover:bg-brand/90"
                 >
                   {broadcastLoading ? "发送中..." : "确定发送"}
                 </Button>
