@@ -1,5 +1,5 @@
 # 1. 依赖阶段
-FROM node:20-alpine AS deps
+FROM node:24-alpine AS deps
 # 替换为阿里云 Alpine 镜像源，并安装 Python 和 C++ 编译工具以防 better-sqlite3 编译失败
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
     apk add --no-cache libc6-compat python3 make g++
@@ -9,7 +9,7 @@ WORKDIR /app
 ENV PRISMA_ENGINES_MIRROR=https://npmmirror.com/mirrors/prisma
 
 # 安装 pnpm 并设置淘宝镜像源
-RUN corepack enable && corepack prepare pnpm@9 --activate && \
+RUN corepack enable && corepack prepare pnpm@latest --activate && \
     pnpm config set registry https://registry.npmmirror.com
 
 # 复制依赖配置
@@ -21,9 +21,9 @@ COPY prisma ./prisma
 RUN pnpm install --frozen-lockfile
 
 # 2. 构建阶段
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 WORKDIR /app
-RUN corepack enable && corepack prepare pnpm@9 --activate
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # 复制依赖和生成的 client
 COPY --from=deps /app/node_modules ./node_modules
@@ -40,7 +40,7 @@ ENV NODE_ENV=production
 RUN pnpm build
 
 # 3. 运行阶段
-FROM node:20-alpine AS runner
+FROM node:24-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -48,7 +48,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-RUN corepack enable && corepack prepare pnpm@9 --activate
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # 复制编译产物和必要文件
 COPY --from=builder /app/public ./public
