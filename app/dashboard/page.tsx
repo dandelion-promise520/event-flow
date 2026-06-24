@@ -11,7 +11,12 @@ import {
   Calendar as CalendarIcon,
   AlertCircle,
   FolderOpen,
-  Users
+  Users,
+  ArrowRight,
+  Ticket,
+  Layers,
+  Flame,
+  Clock
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import DashboardAnalytics from "@/components/dashboard-analytics"
@@ -79,11 +84,66 @@ interface TicketType {
   event: EventType
 }
 
+interface AdminStats {
+  stats: {
+    totalUsers: number
+    totalEvents: number
+    totalTickets: number
+    checkedInTickets: number
+    checkInRate: number
+  }
+  latestUsers: {
+    id: string
+    name: string
+    email: string
+    role: string
+    createdAt: string
+  }[]
+  latestEvents: {
+    id: string
+    title: string
+    description?: string
+    location: string
+    startTime: string
+    endTime: string
+    capacity: number
+    price?: number
+    category: string
+    status?: string
+    createdAt: string
+    organizer: {
+      name: string
+    }
+  }[]
+  popularEvents: {
+    id: string
+    title: string
+    description?: string
+    location: string
+    startTime: string
+    endTime: string
+    capacity: number
+    price?: number
+    category: string
+    status?: string
+    createdAt: string
+    organizer: {
+      name: string
+    }
+    soldCount: number
+  }[]
+  categoryDistribution: {
+    category: string
+    count: number
+  }[]
+}
+
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
   const [tickets, setTickets] = useState<TicketType[]>([])
   const [createdEvents, setCreatedEvents] = useState<EventType[]>([])
   const [dashboardTickets, setDashboardTickets] = useState<TicketData[]>([])
+  const [adminStats, setAdminStats] = useState<AdminStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [dbCategories, setDbCategories] = useState<{ label: string; value: string }[]>([])
 
@@ -120,6 +180,14 @@ export default function DashboardPage() {
         const res = await fetch(`/api/tickets?userId=${currUser.id}`)
         const data = await res.json()
         setTickets(data)
+      } else if (currUser.role === "ADMIN") {
+        const res = await fetch(`/api/admin/stats?adminId=${currUser.id}`)
+        const data = await res.json()
+        if (data.success) {
+          setAdminStats(data)
+        } else {
+          toast.error(data.message || "获取大盘数据失败")
+        }
       } else {
         const res = await fetch(`/api/events/dashboard?organizerId=${currUser.id}`)
         const data = await res.json()
@@ -779,31 +847,310 @@ export default function DashboardPage() {
       )}
 
       {user.role === "ADMIN" && (
-        <div className="grid gap-6 sm:grid-cols-2 mt-4">
-          <Link
-            href="/dashboard/categories"
-            className="flex items-center justify-between rounded-2xl border border-border bg-card p-6 shadow-xs hover:bg-muted/50 transition-colors"
-          >
-            <div>
-              <h3 className="font-bold text-foreground">活动分类管理</h3>
-              <p className="mt-1 text-xs text-muted-foreground">
-                对校园活动类型进行创建、重命名或删除维护
-              </p>
+        <div className="space-y-6">
+          {/* 快捷入口 */}
+          <div className="grid gap-4 sm:grid-cols-2 mt-2">
+            <Link
+              href="/dashboard/categories"
+              className="group relative flex items-center justify-between overflow-hidden rounded-xl border border-border bg-card p-5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-brand/30"
+            >
+              <div className="flex items-center gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand transition-colors group-hover:bg-brand group-hover:text-brand-foreground">
+                  <FolderOpen className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-foreground transition-colors group-hover:text-brand">活动分类配置</h3>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    管理系统内的活动类型与标签
+                  </p>
+                </div>
+              </div>
+              <div className="text-muted-foreground transition-transform duration-300 group-hover:translate-x-1">
+                <ArrowRight className="h-4 w-4" />
+              </div>
+            </Link>
+            <Link
+              href="/dashboard/accounts"
+              className="group relative flex items-center justify-between overflow-hidden rounded-xl border border-border bg-card p-5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-brand/30"
+            >
+              <div className="flex items-center gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand transition-colors group-hover:bg-brand group-hover:text-brand-foreground">
+                  <Users className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-foreground transition-colors group-hover:text-brand">系统账号授权</h3>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    系统管理员、主办方与学生账号管理
+                  </p>
+                </div>
+              </div>
+              <div className="text-muted-foreground transition-transform duration-300 group-hover:translate-x-1">
+                <ArrowRight className="h-4 w-4" />
+              </div>
+            </Link>
+          </div>
+
+          {/* 核心指标网格 */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mt-6">
+            {/* Card 1: 全站用户数 */}
+            <div className="rounded-xl border border-border bg-card p-5 shadow-xs transition-all duration-300 hover:shadow-xs hover:border-border/80">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-muted-foreground">全站用户数</span>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 dark:bg-blue-500/20">
+                  <Users className="h-4 w-4" />
+                </div>
+              </div>
+              <div className="mt-3 flex items-baseline gap-1">
+                <span className="text-2xl font-bold tracking-tight text-foreground">
+                  {adminStats?.stats.totalUsers ?? 0}
+                </span>
+                <span className="text-xs text-muted-foreground">位注册用户</span>
+              </div>
+              <p className="mt-2 text-[10px] text-muted-foreground">包含学生、主办方与管理员</p>
             </div>
-            <FolderOpen className="size-6 text-brand shrink-0" />
-          </Link>
-          <Link
-            href="/dashboard/accounts"
-            className="flex items-center justify-between rounded-2xl border border-border bg-card p-6 shadow-xs hover:bg-muted/50 transition-colors"
-          >
-            <div>
-              <h3 className="font-bold text-foreground">系统账号管理</h3>
-              <p className="mt-1 text-xs text-muted-foreground">
-                新建、修改、重置密码及移除系统账号
-              </p>
+
+            {/* Card 2: 活动发布总量 */}
+            <div className="rounded-xl border border-border bg-card p-5 shadow-xs transition-all duration-300 hover:shadow-xs hover:border-border/80">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-muted-foreground">活动发布总量</span>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/20">
+                  <CalendarIcon className="h-4 w-4" />
+                </div>
+              </div>
+              <div className="mt-3 flex items-baseline gap-1">
+                <span className="text-2xl font-bold tracking-tight text-foreground">
+                  {adminStats?.stats.totalEvents ?? 0}
+                </span>
+                <span className="text-xs text-muted-foreground">个活动</span>
+              </div>
+              <p className="mt-2 text-[10px] text-muted-foreground">所有已发布和筹备中的校园活动</p>
             </div>
-            <Users className="size-6 text-brand shrink-0" />
-          </Link>
+
+            {/* Card 3: 门票预订与核销 */}
+            <div className="rounded-xl border border-border bg-card p-5 shadow-xs transition-all duration-300 hover:shadow-xs hover:border-border/80">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-muted-foreground">门票预订与核销</span>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500 dark:bg-amber-500/20">
+                  <Ticket className="h-4 w-4" />
+                </div>
+              </div>
+              <div className="mt-3 flex items-baseline justify-between">
+                <div>
+                  <span className="text-2xl font-bold tracking-tight text-foreground">
+                    {adminStats?.stats.checkedInTickets ?? 0}
+                  </span>
+                  <span className="text-xs text-muted-foreground"> / {adminStats?.stats.totalTickets ?? 0} 张</span>
+                </div>
+                <span className="text-xs font-bold text-amber-500">{adminStats?.stats.checkInRate ?? 0}% 核销</span>
+              </div>
+              {/* 百分比条 */}
+              <div className="mt-3 h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-amber-500 transition-all duration-500"
+                  style={{ width: `${Math.min(adminStats?.stats.checkInRate ?? 0, 100)}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Card 4: 活动分类总数 */}
+            <div className="rounded-xl border border-border bg-card p-5 shadow-xs transition-all duration-300 hover:shadow-xs hover:border-border/80">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-muted-foreground">活动分类总数</span>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-500 dark:bg-indigo-500/20">
+                  <Layers className="h-4 w-4" />
+                </div>
+              </div>
+              <div className="mt-3 flex items-baseline gap-1">
+                <span className="text-2xl font-bold tracking-tight text-foreground">
+                  {adminStats?.categoryDistribution.length ?? 0}
+                </span>
+                <span className="text-xs text-muted-foreground">个分类</span>
+              </div>
+              <p className="mt-2 text-[10px] text-muted-foreground">支持动态配置的学术/社团/文体等</p>
+            </div>
+          </div>
+
+          {/* 双列大盘列表 */}
+          <div className="grid gap-6 lg:grid-cols-12 mt-6">
+            {/* 左列 (Col Span 6) */}
+            <div className="lg:col-span-6 space-y-6">
+              {/* 最新加入成员 */}
+              <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+                <h2 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
+                  <Users className="h-4 w-4 text-brand" />
+                  <span>最新加入成员</span>
+                </h2>
+                <div className="space-y-3.5">
+                  {adminStats?.latestUsers && adminStats.latestUsers.length > 0 ? (
+                    adminStats.latestUsers.map((u) => (
+                      <div key={u.id} className="flex items-center justify-between rounded-lg border border-border/40 bg-muted/20 p-3 transition-colors hover:bg-muted/40">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand/10 text-brand font-bold text-xs">
+                            {u.name.slice(0, 1).toUpperCase()}
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold text-foreground">{u.name}</div>
+                            <div className="text-[10px] text-muted-foreground">{u.email}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant="secondary"
+                            className={cn(
+                              "text-[10px] px-2 py-0.5 border font-medium",
+                              u.role === "ADMIN" && "bg-rose-500/10 text-rose-500 hover:bg-rose-500/10 border-rose-500/20",
+                              u.role === "ORGANIZER" && "bg-amber-500/10 text-amber-500 hover:bg-amber-500/10 border-amber-500/20",
+                              u.role === "USER" && "bg-blue-500/10 text-blue-500 hover:bg-blue-500/10 border-blue-500/20"
+                            )}
+                          >
+                            {u.role === "ADMIN" ? "管理员" : u.role === "ORGANIZER" ? "主办方" : "学生"}
+                          </Badge>
+                          <span className="text-[10px] text-muted-foreground font-mono">
+                            {new Date(u.createdAt).toLocaleDateString("zh-CN", {
+                              month: "numeric",
+                              day: "numeric",
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-muted-foreground text-center py-4">暂无新加入成员</p>
+                  )}
+                </div>
+              </div>
+
+              {/* 各分类活动占比 */}
+              <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+                <h2 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-brand" />
+                  <span>各分类活动占比</span>
+                </h2>
+                <div className="space-y-4">
+                  {adminStats?.categoryDistribution && adminStats.categoryDistribution.length > 0 ? (
+                    adminStats.categoryDistribution.map((item) => {
+                      const totalEvents = adminStats?.stats.totalEvents || 1
+                      const percentage = Math.round((item.count / totalEvents) * 100)
+                      return (
+                        <div key={item.category} className="space-y-1.5">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-bold text-foreground/95">{item.category}</span>
+                            <span className="text-muted-foreground font-medium">
+                              {item.count} 个活动 ({percentage}%)
+                            </span>
+                          </div>
+                          <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-brand transition-all duration-500"
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
+                        </div>
+                      )
+                    })
+                  ) : (
+                    <p className="text-xs text-muted-foreground text-center py-4">暂无分类统计数据</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* 右列 (Col Span 6) */}
+            <div className="lg:col-span-6 space-y-6">
+              {/* 热门校园活动 Top 5 */}
+              <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+                <h2 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
+                  <Flame className="h-4 w-4 text-orange-500" />
+                  <span>热门校园活动 Top 5</span>
+                </h2>
+                <div className="space-y-4">
+                  {adminStats?.popularEvents && adminStats.popularEvents.length > 0 ? (
+                    adminStats.popularEvents.map((evt, idx) => {
+                      const soldPercent = Math.min(
+                        Math.round((evt.soldCount / (evt.capacity || 1)) * 100),
+                        100
+                      )
+                      return (
+                        <div key={evt.id} className="space-y-2">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex gap-2">
+                              <span className={cn(
+                                "flex h-5 w-5 shrink-0 items-center justify-center rounded text-[10px] font-bold",
+                                idx === 0 && "bg-amber-500 text-amber-foreground",
+                                idx === 1 && "bg-slate-300 text-slate-800",
+                                idx === 2 && "bg-amber-700/80 text-white",
+                                idx > 2 && "bg-muted text-muted-foreground"
+                              )}>
+                                {idx + 1}
+                              </span>
+                              <div>
+                                <h3 className="text-xs font-bold text-foreground/90 line-clamp-1">{evt.title}</h3>
+                                <p className="text-[10px] text-muted-foreground mt-0.5">
+                                  主办方: {evt.organizer.name} | 地点: {evt.location}
+                                </p>
+                              </div>
+                            </div>
+                            <span className="text-[10px] font-bold text-foreground shrink-0 font-mono">
+                              {evt.soldCount} / {evt.capacity} 张
+                            </span>
+                          </div>
+                          {/* 售出比条 */}
+                          <div className="flex items-center gap-2 pl-7">
+                            <div className="h-1.5 flex-1 rounded-full bg-muted overflow-hidden">
+                              <div
+                                className="h-full rounded-full bg-orange-500 transition-all duration-500"
+                                style={{ width: `${soldPercent}%` }}
+                              />
+                            </div>
+                            <span className="text-[9px] font-semibold text-muted-foreground shrink-0 w-8 text-right font-mono">
+                              {soldPercent}%
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    })
+                  ) : (
+                    <p className="text-xs text-muted-foreground text-center py-4">暂无热门活动</p>
+                  )}
+                </div>
+              </div>
+
+              {/* 最新发布活动 */}
+              <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+                <h2 className="text-sm font-bold text-foreground mb-4 flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-brand" />
+                  <span>最新发布活动</span>
+                </h2>
+                <div className="space-y-3">
+                  {adminStats?.latestEvents && adminStats.latestEvents.length > 0 ? (
+                    adminStats.latestEvents.map((evt) => (
+                      <div key={evt.id} className="flex items-center justify-between rounded-lg border border-border/40 bg-muted/10 p-3 hover:bg-muted/20 transition-colors">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-border/60">
+                              {evt.category}
+                            </Badge>
+                            <h4 className="text-xs font-bold text-foreground line-clamp-1">{evt.title}</h4>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground mt-1 truncate">
+                            主办方: {evt.organizer.name} | 地点: {evt.location}
+                          </p>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground shrink-0 pl-4 font-mono">
+                          {new Date(evt.createdAt).toLocaleDateString("zh-CN", {
+                            month: "numeric",
+                            day: "numeric",
+                          })}
+                        </span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-muted-foreground text-center py-4">暂无最新发布活动</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
