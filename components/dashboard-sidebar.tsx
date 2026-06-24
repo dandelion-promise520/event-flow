@@ -103,7 +103,17 @@ export default function DashboardSidebar() {
     <Sidebar collapsible="icon" className="top-16 h-[calc(100vh-4rem)] border-r border-border bg-card">
       <SidebarHeader className={`border-b border-border/50 ${isCollapsed ? "p-2" : "p-4"}`}>
         <div className={`flex items-center font-bold text-foreground w-full ${isCollapsed ? "justify-center" : "justify-between"}`}>
-          {!isCollapsed && <span className="truncate text-sm pl-1">EventFlow 控制台</span>}
+          {!isCollapsed && (
+            <div className="flex items-center gap-2 pl-1">
+              {/* EventFlow 品牌标志 */}
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-brand">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="M2 3h10M2 7h6M2 11h8" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <span className="truncate text-sm font-semibold">校园活动票务管理系统</span>
+            </div>
+          )}
           <SidebarTrigger className="size-8 text-muted-foreground hover:text-foreground shrink-0" />
         </div>
       </SidebarHeader>

@@ -1,4 +1,4 @@
-import { Geist_Mono, Inter } from "next/font/google"
+import { Outfit, Geist_Mono } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -6,12 +6,22 @@ import Navbar from "@/components/navbar"
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/sonner"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
+// Replaced Inter with Outfit - more distinctive display sans-serif
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  weight: ["300", "400", "500", "600", "700", "800"],
+})
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
 })
+
+export const metadata = {
+  title: "校园活动票务管理系统",
+  description: "极速预订学术讲座与社团活动，电子门票自动生成，入场扫码核销。",
+}
 
 export default function RootLayout({
   children,
@@ -22,12 +32,7 @@ export default function RootLayout({
     <html
       lang="zh-CN"
       suppressHydrationWarning
-      className={cn(
-        "antialiased",
-        fontMono.variable,
-        "font-sans",
-        inter.variable
-      )}
+      className={cn("antialiased", fontMono.variable, outfit.variable)}
     >
       <body className="min-h-screen bg-background text-foreground">
         <ThemeProvider

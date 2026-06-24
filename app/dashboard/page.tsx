@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import {
-  Loader2,
   Plus,
   Trash2,
   Megaphone,
@@ -522,8 +521,20 @@ export default function DashboardPage() {
 
   if (loading || !user) {
     return (
-      <div className="flex h-[calc(100vh-6rem)] items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="space-y-6">
+        <div className="flex items-center justify-between border-b border-border/50 pb-4">
+          <div className="space-y-2">
+            <div className="h-7 w-28 rounded-lg bg-muted animate-pulse" />
+            <div className="h-4 w-44 rounded-lg bg-muted animate-pulse" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1,2,3,4].map(i => <div key={i} className="h-24 rounded-xl bg-muted animate-pulse" />)}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 h-56 rounded-xl bg-muted animate-pulse" />
+          <div className="h-56 rounded-xl bg-muted animate-pulse" />
+        </div>
       </div>
     )
   }
@@ -592,9 +603,16 @@ export default function DashboardPage() {
             ))}
           </div>
           {tickets.length === 0 && (
-            <p className="mt-8 text-center text-sm text-muted-foreground/80">
-              目前还没有订购任何活动门票
-            </p>
+            <div className="mt-8 flex flex-col items-center gap-3 text-center">
+              <Ticket className="h-8 w-8 text-muted-foreground/40" />
+              <p className="text-sm text-muted-foreground">
+                目前还没有订购任何活动门票
+              </p>
+              <Button render={<Link href="/" />} nativeButton={false} variant="outline" size="sm" className="gap-1.5">
+                <ArrowRight className="h-3.5 w-3.5" />
+                去探索活动
+              </Button>
+            </div>
           )}
         </div>
       )}
@@ -602,7 +620,7 @@ export default function DashboardPage() {
       {user.role === "ADMIN" && activeTab === "stats" && (
         <div className="space-y-6">
           {/* Bento box hero Welcome Card */}
-          <div className="relative overflow-hidden rounded-2xl border border-white/20 dark:border-white/5 bg-gradient-to-r from-brand/90 to-indigo-600/80 p-6 text-white shadow-md">
+          <div className="relative overflow-hidden rounded-2xl border border-white/20 dark:border-white/5 bg-gradient-to-r from-brand/90 to-primary/50 p-6 text-white shadow-md">
             <div className="relative z-10">
               <h2 className="text-lg font-bold">系统全局大盘中心</h2>
               <p className="text-xs text-white/80 mt-1">您可在本页监控全校活动运作、电子门票核销、用户活跃状态，或通过右上角切换至活动工作区直接发布/编辑活动。</p>
@@ -652,84 +670,92 @@ export default function DashboardPage() {
             </Link>
           </div>
 
+
           {/* 核心指标网格 */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mt-6">
             {/* Card 1: 全站用户数 */}
-            <div className="rounded-xl backdrop-blur-md bg-white/70 dark:bg-card/45 border border-border/50 p-5 shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-brand/20">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-muted-foreground">全站用户数</span>
+            <Card className="transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-brand/20">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-xs font-semibold text-muted-foreground">全站用户数</CardTitle>
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 dark:bg-blue-500/20">
                   <Users className="h-4 w-4" />
                 </div>
-              </div>
-              <div className="mt-3 flex items-baseline gap-1">
-                <span className="text-2xl font-bold tracking-tight text-foreground">
-                  {adminStats?.stats.totalUsers ?? 0}
-                </span>
-                <span className="text-xs text-muted-foreground">位注册用户</span>
-              </div>
-              <p className="mt-2 text-[10px] text-muted-foreground/80">包含学生、主办方与管理员</p>
-            </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-bold tracking-tight text-foreground">
+                    {adminStats?.stats.totalUsers ?? 0}
+                  </span>
+                  <span className="text-xs text-muted-foreground">位注册用户</span>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground/80">包含学生、主办方与管理员</p>
+              </CardContent>
+            </Card>
 
             {/* Card 2: 活动发布总量 */}
-            <div className="rounded-xl backdrop-blur-md bg-white/70 dark:bg-card/45 border border-border/50 p-5 shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-brand/20">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-muted-foreground">活动发布总量</span>
+            <Card className="transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-brand/20">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-xs font-semibold text-muted-foreground">活动发布总量</CardTitle>
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/20">
                   <CalendarIcon className="h-4 w-4" />
                 </div>
-              </div>
-              <div className="mt-3 flex items-baseline gap-1">
-                <span className="text-2xl font-bold tracking-tight text-foreground">
-                  {adminStats?.stats.totalEvents ?? 0}
-                </span>
-                <span className="text-xs text-muted-foreground">个活动</span>
-              </div>
-              <p className="mt-2 text-[10px] text-muted-foreground/80">所有已发布和筹备中的校园活动</p>
-            </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-bold tracking-tight text-foreground">
+                    {adminStats?.stats.totalEvents ?? 0}
+                  </span>
+                  <span className="text-xs text-muted-foreground">个活动</span>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground/80">所有已发布和筹备中的校园活动</p>
+              </CardContent>
+            </Card>
 
             {/* Card 3: 门票预订与核销 */}
-            <div className="col-span-1 sm:col-span-2 rounded-xl backdrop-blur-md bg-white/70 dark:bg-card/45 border border-border/50 p-5 shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-brand/20">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-muted-foreground">门票预订与核销</span>
+            <Card className="col-span-1 sm:col-span-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-brand/20">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-xs font-semibold text-muted-foreground">门票预订与核销</CardTitle>
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500 dark:bg-amber-500/20">
                   <Ticket className="h-4 w-4" />
                 </div>
-              </div>
-              <div className="mt-3 flex items-baseline justify-between gap-4">
-                <div>
-                  <span className="text-2xl font-bold tracking-tight text-foreground">
-                    {adminStats?.stats.checkedInTickets ?? 0}
-                  </span>
-                  <span className="text-xs text-muted-foreground"> / {adminStats?.stats.totalTickets ?? 0} 张</span>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-baseline justify-between gap-4">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-bold tracking-tight text-foreground">
+                      {adminStats?.stats.checkedInTickets ?? 0}
+                    </span>
+                    <span className="text-xs text-muted-foreground">/ {adminStats?.stats.totalTickets ?? 0} 张</span>
+                  </div>
+                  <span className="text-xs font-bold text-amber-500">{adminStats?.stats.checkInRate ?? 0}% 已核销</span>
                 </div>
-                <span className="text-xs font-bold text-amber-500">{adminStats?.stats.checkInRate ?? 0}% 已核销</span>
-              </div>
-              {/* 圆角进度条 */}
-              <div className="mt-4 h-2 w-full rounded-full bg-muted overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-amber-400 to-amber-500 transition-all duration-500"
-                  style={{ width: `${Math.min(adminStats?.stats.checkInRate ?? 0, 100)}%` }}
-                />
-              </div>
-            </div>
+                <div className="mt-4 h-2 w-full rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-amber-400 to-amber-500 transition-all duration-500"
+                    style={{ width: `${Math.min(adminStats?.stats.checkInRate ?? 0, 100)}%` }}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Card 4: 活动分类总数 */}
-            <div className="rounded-xl backdrop-blur-md bg-white/70 dark:bg-card/45 border border-border/50 p-5 shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-brand/20">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-muted-foreground">活动分类总数</span>
+            <Card className="transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-brand/20">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-xs font-semibold text-muted-foreground">活动分类总数</CardTitle>
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-500 dark:bg-indigo-500/20">
                   <Layers className="h-4 w-4" />
                 </div>
-              </div>
-              <div className="mt-3 flex items-baseline gap-1">
-                <span className="text-2xl font-bold tracking-tight text-foreground">
-                  {adminStats?.categoryDistribution.length ?? 0}
-                </span>
-                <span className="text-xs text-muted-foreground">个分类</span>
-              </div>
-              <p className="mt-2 text-[10px] text-muted-foreground/80">支持动态配置的学术/社团/文体等</p>
-            </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-bold tracking-tight text-foreground">
+                    {adminStats?.categoryDistribution.length ?? 0}
+                  </span>
+                  <span className="text-xs text-muted-foreground">个分类</span>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground/80">支持动态配置的学术/社团/文体等</p>
+              </CardContent>
+            </Card>
           </div>
 
           {/* 双列大盘列表 */}
@@ -747,7 +773,7 @@ export default function DashboardPage() {
                     adminStats.latestUsers.map((u) => (
                       <div key={u.id} className="flex items-center justify-between rounded-lg border border-border/20 bg-card/40 p-2.5 transition-all duration-200 hover:bg-card/70 hover:translate-x-0.5">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-md bg-white/40 dark:bg-card/40 border border-border/40 text-brand font-bold text-xs shrink-0 shadow-xs">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand/10 border border-brand/20 text-brand font-bold text-xs shrink-0">
                             {u.name.slice(0, 1).toUpperCase()}
                           </div>
                           <div>
@@ -803,7 +829,7 @@ export default function DashboardPage() {
                           </div>
                           <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
                             <div
-                              className="h-full rounded-full bg-gradient-to-r from-brand to-indigo-500 transition-all duration-500"
+                              className="h-full rounded-full bg-gradient-to-r from-brand to-primary/60 transition-all duration-500"
                               style={{ width: `${percentage}%` }}
                             />
                           </div>
@@ -848,14 +874,14 @@ export default function DashboardPage() {
                               <div className="flex gap-2 min-w-0">
                                 <div>
                                   <h3 className="text-xs font-bold text-foreground/90 line-clamp-1 group-hover:text-brand transition-colors">{evt.title}</h3>
-                                  <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
+                                  <p className="text-xs text-muted-foreground mt-0.5 truncate">
                                     主办方: {evt.organizer.name} | 地点: {evt.location}
                                   </p>
                                 </div>
                               </div>
-                              <span className="text-[10px] font-bold text-foreground shrink-0 font-mono">
-                                {evt.soldCount} / {evt.capacity} 张
-                              </span>
+                               <span className="text-xs font-bold text-foreground shrink-0 font-mono">
+                                 {evt.soldCount} / {evt.capacity} 张
+                               </span>
                             </div>
                             {/* 售出比条 */}
                             <div className="flex items-center gap-2">
@@ -865,7 +891,7 @@ export default function DashboardPage() {
                                   style={{ width: `${soldPercent}%` }}
                                 />
                               </div>
-                              <span className="text-[9px] font-semibold text-muted-foreground shrink-0 w-8 text-right font-mono">
+                              <span className="text-xs font-semibold text-muted-foreground shrink-0 w-8 text-right font-mono">
                                 {soldPercent}%
                               </span>
                             </div>
@@ -874,7 +900,7 @@ export default function DashboardPage() {
                       )
                     })
                   ) : (
-                    <p className="text-xs text-muted-foreground text-center py-4">暂无热门活动</p>
+                    <div className="py-8 text-center text-sm text-muted-foreground italic">暂无热门活动</div>
                   )}
                 </div>
               </div>
@@ -894,16 +920,16 @@ export default function DashboardPage() {
                         
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-1.5">
-                            <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-border/60 shrink-0 font-medium bg-background/50">
+                            <Badge variant="outline" className="text-xs px-1.5 py-0 border-border/60 shrink-0 font-medium bg-background/50">
                               {evt.category}
                             </Badge>
                             <h4 className="text-xs font-bold text-foreground line-clamp-1 group-hover:text-brand transition-colors">{evt.title}</h4>
                           </div>
-                          <p className="text-[10px] text-muted-foreground mt-1 truncate">
-                            主办方: {evt.organizer.name} | 地点: {evt.location}
-                          </p>
+                           <p className="text-xs text-muted-foreground mt-1 truncate">
+                             主办方: {evt.organizer.name} | 地点: {evt.location}
+                           </p>
                         </div>
-                        <span className="text-[10px] text-muted-foreground shrink-0 pl-4 font-mono">
+                         <span className="text-xs text-muted-foreground shrink-0 pl-4 font-mono">
                           {new Date(evt.createdAt).toLocaleDateString("zh-CN", {
                             month: "numeric",
                             day: "numeric",
@@ -1196,9 +1222,11 @@ export default function DashboardPage() {
                   </div>
                 ))}
                 {createdEvents.length === 0 && (
-                  <p className="py-8 text-center text-xs text-muted-foreground/80">
-                    目前未发布任何活动
-                  </p>
+                  <div className="flex flex-col items-center gap-3 py-8 text-center">
+                    <CalendarIcon className="h-8 w-8 text-muted-foreground/40" />
+                    <p className="text-sm text-muted-foreground">目前未发布任何活动</p>
+                    <p className="text-xs text-muted-foreground/70">在左侧表单填写相关信息，然后点击『确认发布活动』</p>
+                  </div>
                 )}
                 </div>
               </CardContent>

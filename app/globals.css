@@ -7,6 +7,7 @@
 @theme inline {
     --font-heading: var(--font-sans);
     --font-sans: var(--font-sans);
+    --font-display: var(--font-sans);
     --color-brand: var(--brand);
     --color-brand-foreground: var(--brand-foreground);
     --color-sidebar-ring: var(--sidebar-ring);
@@ -63,7 +64,7 @@
     --secondary: oklch(0.96 0 0); /* 苹果浅灰按钮填充 (#f5f5f7) */
     --secondary-foreground: oklch(0.15 0 0);
     --muted: oklch(0.96 0 0);
-    --muted-foreground: oklch(0.53 0 0); /* 苹果辅助灰文字 (#86868b) */
+    --muted-foreground: oklch(0.45 0 0); /* 辅助灰文字，提升至 ~5.5:1 对比度（WCAG AA） */
     --accent: oklch(0.96 0 0);
     --accent-foreground: oklch(0.15 0 0);
     --destructive: oklch(0.59 0.19 18); /* 苹果红 (#ff3b30) */
@@ -100,7 +101,7 @@
     --secondary: oklch(0.20 0 0); /* 苹果深色卡片填充 (#2c2c2e) */
     --secondary-foreground: oklch(0.97 0 0);
     --muted: oklch(0.12 0 0);
-    --muted-foreground: oklch(0.55 0 0); /* 苹果暗色辅助灰文字 (#86868b) */
+    --muted-foreground: oklch(0.60 0 0); /* 暗色辅助灰文字，提升对比度 */
     --accent: oklch(0.12 0 0);
     --accent-foreground: oklch(0.97 0 0);
     --destructive: oklch(0.62 0.17 18);
@@ -128,6 +129,7 @@
     }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
     }
   button:not(:disabled), [role="button"]:not(:disabled) {
     cursor: pointer;
@@ -135,4 +137,23 @@
   html {
     @apply font-sans;
     }
+}
+
+/* Ticket status reveal - used in bento ticket wallet */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in-up 0.25s ease-out both;
+}
+
+/* Hardware-accelerated scan laser (transform only, no layout paint) */
+@keyframes scan-down {
+  from { transform: translateY(0); }
+  to   { transform: translateY(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-scan { animation: none; }
+  .animate-fade-in { animation: none; }
 }
