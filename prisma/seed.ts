@@ -118,7 +118,7 @@ async function main() {
       capacity: 100,
       price: 0,
       category: "学术讲座",
-      coverUrl: "/images/geek-marathon.jpg",
+      coverUrl: "/uploads/geek-marathon.jpg",
       organizerId: orgComputer.id,
     },
   });
@@ -134,7 +134,7 @@ async function main() {
       capacity: 200,
       price: 0,
       category: "学术讲座",
-      coverUrl: "/images/ai-forum.jpg",
+      coverUrl: "/uploads/ai-forum.jpg",
       organizerId: orgComputer.id,
     },
   });
@@ -150,7 +150,7 @@ async function main() {
       capacity: 30,
       price: 0,
       category: "社团活动",
-      coverUrl: "/images/board-games.jpg",
+      coverUrl: "/uploads/board-games.jpg",
       organizerId: orgComputer.id,
     },
   });
@@ -167,7 +167,7 @@ async function main() {
       capacity: 500,
       price: 0,
       category: "文体比赛",
-      coverUrl: "/images/singer-contest.jpg",
+      coverUrl: "/uploads/singer-contest.jpg",
       organizerId: orgArt.id,
     },
   });
@@ -183,7 +183,7 @@ async function main() {
       capacity: 1000,
       price: 0,
       category: "社团活动",
-      coverUrl: "/images/music-festival.jpg",
+      coverUrl: "/uploads/music-festival.jpg",
       organizerId: orgArt.id,
     },
   });
@@ -200,7 +200,7 @@ async function main() {
       capacity: 64,
       price: 0,
       category: "文体比赛",
-      coverUrl: "/images/badminton.jpg",
+      coverUrl: "/uploads/badminton.jpg",
       organizerId: orgSports.id,
     },
   });
@@ -216,7 +216,7 @@ async function main() {
       capacity: 800,
       price: 0,
       category: "文体比赛",
-      coverUrl: "/images/night-run.jpg",
+      coverUrl: "/uploads/night-run.jpg",
       organizerId: orgSports.id,
     },
   });
