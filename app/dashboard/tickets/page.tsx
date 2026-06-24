@@ -70,6 +70,7 @@ export default function TicketsReportPage() {
     const stored = localStorage.getItem("campus_user")
     if (stored) {
       const curr = JSON.parse(stored)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUser(curr)
       loadTicketsData(curr)
     }

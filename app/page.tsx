@@ -21,7 +21,7 @@ export default function Home() {
         if (res.ok) {
           const data = await res.json()
           if (Array.isArray(data)) {
-            setDbCategories(["", ...data.map((c: any) => c.name)])
+            setDbCategories(["", ...data.map((c: { name: string }) => c.name)])
           }
         }
       } catch (err) {

@@ -8,7 +8,7 @@ async function verifyAdmin(adminId: string | null) {
   return user?.role === "ADMIN";
 }
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const categories = await prisma.category.findMany({
       orderBy: { name: "asc" },

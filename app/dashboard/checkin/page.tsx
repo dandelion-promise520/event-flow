@@ -31,6 +31,7 @@ export default function CheckinPage() {
   useEffect(() => {
     const stored = localStorage.getItem("campus_user")
     if (stored) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUser(JSON.parse(stored))
     }
     setLoading(false)

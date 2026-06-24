@@ -2,9 +2,7 @@ import { test } from "node:test"
 import assert from "node:assert"
 import {
   calculateMetrics,
-  getRecent7DaysTrends,
-  getCategoryDistribution,
-  getEventBookingRates
+  getCategoryDistribution
 } from "../lib/analytics-utils"
 
 const dummyEvents = [

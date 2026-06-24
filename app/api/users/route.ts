@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { Prisma } from "@prisma/client";
 
 async function verifyAdmin(adminId: string | null) {
   if (!adminId) return false;
@@ -20,7 +21,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: false, message: "无权访问，仅限管理员" }, { status: 403 });
     }
 
-    const where: any = {};
+    const where: Prisma.UserWhereInput = {};
     if (search) {
       where.OR = [
         { name: { contains: search } },
@@ -127,7 +128,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ success: false, message: "该邮箱已被其他账号使用" }, { status: 400 });
     }
 
-    const data: any = { name, email, role };
+    const data: Prisma.UserUpdateInput = { name, email, role };
     if (password && password.trim()) {
       data.password = await bcrypt.hash(password.trim(), 10);
     }

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { Calendar, LogOut, Moon, Sun } from "lucide-react"
+import { LogOut, Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 import NotificationCenter from "./notification-center"
@@ -73,7 +73,6 @@ export default function Navbar() {
           href="/"
           className="flex items-center gap-2 text-lg font-bold text-foreground"
         >
-          <Calendar className="size-5 text-brand" />
           <span>EventFlow</span>
         </Link>
         <nav className="flex items-center gap-6">

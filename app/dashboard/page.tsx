@@ -15,7 +15,7 @@ import {
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import DashboardAnalytics from "@/components/dashboard-analytics"
-import type { EventData } from "@/lib/analytics-utils"
+import type { EventData, TicketData } from "@/lib/analytics-utils"
 
 import { Button } from "@/components/ui/button"
 import { FileUploader, type UploadFile } from "@/components/ui/file-uploader"
@@ -83,7 +83,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
   const [tickets, setTickets] = useState<TicketType[]>([])
   const [createdEvents, setCreatedEvents] = useState<EventType[]>([])
-  const [dashboardTickets, setDashboardTickets] = useState<any[]>([])
+  const [dashboardTickets, setDashboardTickets] = useState<TicketData[]>([])
   const [loading, setLoading] = useState(true)
   const [dbCategories, setDbCategories] = useState<{ label: string; value: string }[]>([])
 
@@ -146,6 +146,7 @@ export default function DashboardPage() {
     const stored = localStorage.getItem("campus_user")
     if (stored) {
       const curr = JSON.parse(stored)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUser(curr)
       loadDashboardData(curr)
     }
@@ -156,7 +157,7 @@ export default function DashboardPage() {
         if (res.ok) {
           const data = await res.json()
           if (Array.isArray(data)) {
-            setDbCategories(data.map((c: any) => ({ label: c.name, value: c.name })))
+            setDbCategories(data.map((c: { name: string }) => ({ label: c.name, value: c.name })))
           }
         }
       } catch (err) {

@@ -25,8 +25,15 @@ interface CategoryType {
   createdAt: string;
 }
 
+interface User {
+  id: string;
+  name: string;
+  role: string;
+  email: string;
+}
+
 export default function CategoriesManagement() {
-  const [adminUser, setAdminUser] = useState<any>(null);
+  const [adminUser, setAdminUser] = useState<User | null>(null);
   const [categories, setCategories] = useState<CategoryType[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -46,11 +53,12 @@ export default function CategoriesManagement() {
       window.location.href = "/dashboard";
       return;
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAdminUser(curr);
-    loadCategories(curr.id);
+    loadCategories();
   }, []);
 
-  const loadCategories = async (adminId: string) => {
+  async function loadCategories() {
     try {
       const res = await fetch("/api/categories");
       const data = await res.json();
@@ -62,7 +70,7 @@ export default function CategoriesManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,7 +91,7 @@ export default function CategoriesManagement() {
         setDialogOpen(false);
         setCurrentName("");
         setEditingId(null);
-        loadCategories(adminUser.id);
+        loadCategories();
       } else {
         toast.error(data.message || "保存失败");
       }
@@ -109,7 +117,7 @@ export default function CategoriesManagement() {
       const data = await res.json();
       if (data.success) {
         toast.success("删除分类成功");
-        loadCategories(adminUser.id);
+        loadCategories();
       } else {
         toast.error(data.message || "删除分类失败");
       }

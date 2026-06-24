@@ -9,8 +9,7 @@ import {
   ClipboardList,
   FolderTree,
   Users,
-  LogOut,
-  Calendar
+  LogOut
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -25,6 +24,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar"
 import {
@@ -49,6 +49,7 @@ export default function DashboardSidebar() {
   useEffect(() => {
     const stored = localStorage.getItem("campus_user")
     if (stored) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUser(JSON.parse(stored))
     }
   }, [])
@@ -100,10 +101,10 @@ export default function DashboardSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="top-16 h-[calc(100vh-4rem)] border-r border-border bg-card">
-      <SidebarHeader className="border-b border-border/50 p-4">
-        <div className="flex items-center gap-2 font-bold text-foreground">
-          <Calendar className="h-5 w-5 text-brand shrink-0" />
-          {!isCollapsed && <span className="truncate">EventFlow 控制台</span>}
+      <SidebarHeader className={`border-b border-border/50 ${isCollapsed ? "p-2" : "p-4"}`}>
+        <div className={`flex items-center font-bold text-foreground w-full ${isCollapsed ? "justify-center" : "justify-between"}`}>
+          {!isCollapsed && <span className="truncate text-sm pl-1">EventFlow 控制台</span>}
+          <SidebarTrigger className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0" />
         </div>
       </SidebarHeader>
       

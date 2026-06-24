@@ -46,8 +46,15 @@ const filterRoleOptions = [
   ...roleOptions,
 ];
 
+interface User {
+  id: string;
+  name: string;
+  role: string;
+  email: string;
+}
+
 export default function AccountsManagement() {
-  const [adminUser, setAdminUser] = useState<any>(null);
+  const [adminUser, setAdminUser] = useState<User | null>(null);
   const [users, setUsers] = useState<UserType[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -76,11 +83,12 @@ export default function AccountsManagement() {
       window.location.href = "/dashboard";
       return;
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAdminUser(curr);
     loadUsers(curr.id, searchQuery, roleFilter);
   }, [searchQuery, roleFilter]);
 
-  const loadUsers = async (adminId: string, search: string, roleVal: string) => {
+  async function loadUsers(adminId: string, search: string, roleVal: string) {
     try {
       const res = await fetch(`/api/users?adminId=${adminId}&search=${encodeURIComponent(search)}&role=${roleVal}`);
       const data = await res.json();
@@ -92,7 +100,7 @@ export default function AccountsManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const handleOpenCreate = () => {
     setEditingId(null);
