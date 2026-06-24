@@ -6,7 +6,6 @@ import Image from "next/image"
 import EventCard, { EventItem } from "@/components/event-card"
 import {
   Search,
-  Ticket,
   CheckCircle,
   QrCode,
   ArrowRight,
@@ -17,7 +16,6 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
@@ -273,7 +271,7 @@ export default function Home() {
             transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             className="relative flex justify-center lg:col-span-7"
           >
-            <div className="relative w-full max-w-[580px] rounded-2xl overflow-hidden shadow-2xl border border-border/30 group aspect-[16/10]">
+            <div className="relative w-full max-w-145 rounded-2xl overflow-hidden shadow-2xl border border-border/30 group aspect-16/10">
               <Image
                 src="/images/campus_hero_bg.jpg"
                 alt="校园活动场景"
@@ -283,7 +281,7 @@ export default function Home() {
                 className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
               />
               {/* Subtle dark gradient for text legibility */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent" />
               {/* Floating overlay card */}
               <div className="absolute bottom-4 left-4 right-4 rounded-xl border border-white/10 bg-black/40 p-3.5 backdrop-blur-md text-white">
                 <div className="flex items-center justify-between gap-3">
@@ -388,8 +386,8 @@ export default function Home() {
               </div>
 
               {/* QR + Status */}
-              <div className="flex flex-col items-center gap-2.5 bg-card/60 p-3 rounded-xl border border-border/30 min-w-[110px]">
-                <div className="relative size-[72px] bg-white p-1 rounded-lg">
+              <div className="flex flex-col items-center gap-2.5 bg-card/60 p-3 rounded-xl border border-border/30 min-w-27.5">
+                <div className="relative size-18 bg-white p-1 rounded-lg">
                   <QrCode className="size-full text-zinc-900" />
                   {ticketStatus === "USED" && (
                     <motion.div
@@ -507,7 +505,7 @@ export default function Home() {
                     transition={{ duration: 0.25, delay: index * 0.04 }}
                     className="flex items-start gap-2.5 py-2.5 text-xs text-muted-foreground first:pt-0 last:pb-0"
                   >
-                    <span className="mt-0.5 size-1.5 rounded-full bg-brand/50 shrink-0 translate-y-[1px]" />
+                    <span className="mt-0.5 size-1.5 rounded-full bg-brand/50 shrink-0 translate-y-px" />
                     <span>{note}</span>
                   </motion.div>
                 ))}

@@ -41,7 +41,7 @@ interface DashboardAnalyticsProps {
   tickets: TicketData[]
 }
 
-const chartConfig = {
+const baseChartConfig = {
   booked: {
     label: "已报名人数",
     color: "var(--color-chart-1)",
@@ -83,6 +83,19 @@ export default function DashboardAnalytics({
   const trendsData = useMemo(() => getRecent7DaysTrends(tickets), [tickets])
   const categoryData = useMemo(() => getCategoryDistribution(events), [events])
   const bookingRatesData = useMemo(() => getEventBookingRates(events), [events])
+
+  const chartConfig = useMemo(() => {
+    const config = { ...baseChartConfig } as ChartConfig
+    categoryData.forEach((entry, index) => {
+      if (!config[entry.category]) {
+        config[entry.category] = {
+          label: entry.category,
+          color: `var(--color-chart-${(index % 5) + 1})`,
+        }
+      }
+    })
+    return config
+  }, [categoryData])
 
   if (!mounted) {
     return <div className="h-64 animate-pulse bg-muted rounded-2xl" />

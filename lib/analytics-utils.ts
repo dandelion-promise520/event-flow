@@ -68,8 +68,8 @@ export function getCategoryDistribution(events: EventData[]) {
   }
 
   events.forEach(e => {
-    if (dist[e.category] !== undefined) {
-      dist[e.category]++
+    if (e.category) {
+      dist[e.category] = (dist[e.category] || 0) + 1
     }
   })
 

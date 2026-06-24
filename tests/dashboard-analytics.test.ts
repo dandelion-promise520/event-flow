@@ -37,3 +37,14 @@ test("getCategoryDistribution: 正确聚合类别数量", () => {
   assert.ok(lecture)
   assert.strictEqual(lecture.count, 1)
 })
+
+test("getCategoryDistribution: 能够动态统计新增的分类数量", () => {
+  const customEvents = [
+    ...dummyEvents,
+    { id: "2", title: "志愿活动", capacity: 20, price: 0, location: "图书馆", category: "志愿服务", startTime: "2026-06-16T10:00:00Z", soldCount: 5, checkedInCount: 2 }
+  ]
+  const dist = getCategoryDistribution(customEvents)
+  const volunteer = dist.find(d => d.category === "志愿服务")
+  assert.ok(volunteer)
+  assert.strictEqual(volunteer.count, 1)
+})

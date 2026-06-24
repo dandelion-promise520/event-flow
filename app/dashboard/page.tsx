@@ -620,7 +620,7 @@ export default function DashboardPage() {
       {user.role === "ADMIN" && activeTab === "stats" && (
         <div className="space-y-6">
           {/* Bento box hero Welcome Card */}
-          <div className="relative overflow-hidden rounded-2xl border border-white/20 dark:border-white/5 bg-gradient-to-r from-brand/90 to-primary/50 p-6 text-white shadow-md">
+          <div className="relative overflow-hidden rounded-2xl border border-white/20 dark:border-white/5 bg-linear-to-r from-brand/90 to-primary/50 p-6 text-white shadow-md">
             <div className="relative z-10">
               <h2 className="text-lg font-bold">系统全局大盘中心</h2>
               <p className="text-xs text-white/80 mt-1">您可在本页监控全校活动运作、电子门票核销、用户活跃状态，或通过右上角切换至活动工作区直接发布/编辑活动。</p>
@@ -731,7 +731,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="mt-4 h-2 w-full rounded-full bg-muted overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-amber-400 to-amber-500 transition-all duration-500"
+                    className="h-full rounded-full bg-linear-to-r from-amber-400 to-amber-500 transition-all duration-500"
                     style={{ width: `${Math.min(adminStats?.stats.checkInRate ?? 0, 100)}%` }}
                   />
                 </div>
@@ -829,7 +829,7 @@ export default function DashboardPage() {
                           </div>
                           <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
                             <div
-                              className="h-full rounded-full bg-gradient-to-r from-brand to-primary/60 transition-all duration-500"
+                              className="h-full rounded-full bg-linear-to-r from-brand to-primary/60 transition-all duration-500"
                               style={{ width: `${percentage}%` }}
                             />
                           </div>
@@ -862,7 +862,7 @@ export default function DashboardPage() {
                         <div key={evt.id} className="relative group transition-all duration-300 hover:translate-x-1">
                           {/* 时间轴节点 */}
                           <div className={cn(
-                            "absolute -left-[21px] top-1.5 flex h-2.5 w-2.5 items-center justify-center rounded-full border-2 border-background",
+                            "absolute -left-5.25 top-1.5 flex h-2.5 w-2.5 items-center justify-center rounded-full border-2 border-background",
                             idx === 0 && "bg-amber-500",
                             idx === 1 && "bg-slate-400",
                             idx === 2 && "bg-amber-700",
@@ -887,7 +887,7 @@ export default function DashboardPage() {
                             <div className="flex items-center gap-2">
                               <div className="h-1.5 flex-1 rounded-full bg-muted overflow-hidden">
                                 <div
-                                  className="h-full rounded-full bg-gradient-to-r from-orange-400 to-orange-500 transition-all duration-500"
+                                  className="h-full rounded-full bg-linear-to-r from-orange-400 to-orange-500 transition-all duration-500"
                                   style={{ width: `${soldPercent}%` }}
                                 />
                               </div>
@@ -916,7 +916,7 @@ export default function DashboardPage() {
                     adminStats.latestEvents.map((evt) => (
                       <div key={evt.id} className="relative group flex items-start justify-between rounded-lg border border-border/40 bg-muted/10 p-3 hover:bg-muted/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xs hover:border-brand/20">
                         {/* 装饰用的小圆点 */}
-                        <div className="absolute -left-[21px] top-4.5 h-2 w-2 rounded-full border border-background bg-brand/60" />
+                        <div className="absolute -left-5.25 top-4.5 h-2 w-2 rounded-full border border-background bg-brand/60" />
                         
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-1.5">

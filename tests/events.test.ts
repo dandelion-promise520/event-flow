@@ -4,7 +4,14 @@ import { prisma } from "../lib/db";
 
 test("Events CRUD flow", async () => {
   // 清理测试数据
-  await prisma.event.deleteMany({ where: { title: "Test Hackathon" } });
+  await prisma.event.deleteMany({
+    where: {
+      OR: [
+        { title: "Test Hackathon" },
+        { title: "Test Hackathon Updated" }
+      ]
+    }
+  });
   let organizer = await prisma.user.findFirst({ where: { role: "ORGANIZER" } });
   if (!organizer) {
     organizer = await prisma.user.create({
@@ -61,5 +68,12 @@ test("Events CRUD flow", async () => {
   assert.strictEqual(dbEvent?.capacity, 60);
 
   // 清理测试数据
-  await prisma.event.deleteMany({ where: { title: "Test Hackathon" } });
+  await prisma.event.deleteMany({
+    where: {
+      OR: [
+        { title: "Test Hackathon" },
+        { title: "Test Hackathon Updated" }
+      ]
+    }
+  });
 });
