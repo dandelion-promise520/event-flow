@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Plus, ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { Loader2, Plus, ArrowLeft, Pencil, Trash2, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -274,7 +274,7 @@ export default function AccountsManagement() {
                             <AlertDialogHeader>
                               <AlertDialogTitle className="text-destructive">确认删除该系统账号吗？</AlertDialogTitle>
                               <AlertDialogDescription className="text-left">
-                                <span className="font-bold text-destructive">⚠️ 警告：</span>
+                                <span className="font-bold text-destructive inline-flex items-center gap-1"><AlertTriangle className="size-3.5 shrink-0" />警告：</span>
                                 删除账号“{u.name} ({u.email})”将执行级联删除。这会同步彻底删除其发布的全部活动、历史门票记录等。此操作具有极高数据风险，且无法恢复。
                               </AlertDialogDescription>
                             </AlertDialogHeader>

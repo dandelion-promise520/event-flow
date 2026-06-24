@@ -9,7 +9,8 @@ import {
   ClipboardList,
   FolderTree,
   Users,
-  LogOut
+  LogOut,
+  Calendar
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -101,7 +102,7 @@ export default function DashboardSidebar() {
     <Sidebar collapsible="icon" className="top-16 h-[calc(100vh-4rem)] border-r border-border bg-card">
       <SidebarHeader className="border-b border-border/50 p-4">
         <div className="flex items-center gap-2 font-bold text-foreground">
-          <span className="text-lg">📅</span>
+          <Calendar className="h-5 w-5 text-brand shrink-0" />
           {!isCollapsed && <span className="truncate">EventFlow 控制台</span>}
         </div>
       </SidebarHeader>

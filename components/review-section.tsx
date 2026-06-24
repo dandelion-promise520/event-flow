@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Star, MessageSquare } from "lucide-react";
+import { Star, MessageSquare, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -185,8 +185,8 @@ export default function ReviewSection({ eventId }: ReviewSectionProps) {
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <div className="flex items-center gap-2 animate-none">
                   <span className="font-semibold text-foreground">{r.user?.name || "匿名用户"}</span>
-                  <Badge variant="secondary" className="scale-90 font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 border-transparent">
-                    ✓ 已核销用户
+                  <Badge variant="secondary" className="scale-90 font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 border-transparent inline-flex items-center gap-1">
+                    <Check className="size-3 shrink-0" /> 已核销用户
                   </Badge>
                 </div>
                 <span>{new Date(r.createdAt).toLocaleString()}</span>

@@ -8,7 +8,10 @@ import {
   Trash2,
   Megaphone,
   Pencil,
-  Calendar as CalendarIcon
+  Calendar as CalendarIcon,
+  AlertCircle,
+  FolderOpen,
+  Users
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import DashboardAnalytics from "@/components/dashboard-analytics"
@@ -506,8 +509,9 @@ export default function DashboardPage() {
           <div className="grid gap-8 lg:grid-cols-12 mt-6">
             {/* 左侧：发布与编辑表单 */}
             <div id="event-form-panel" className="lg:col-span-5 rounded-2xl border border-border bg-card p-6 shadow-xs h-fit">
-              <h2 className="text-base font-bold text-foreground mb-4">
-                {editingEventId ? "📝 编辑活动信息" : "📣 发布全新校园活动"}
+              <h2 className="text-base font-bold text-foreground mb-4 flex items-center gap-1.5">
+                {editingEventId ? <Pencil className="size-4 shrink-0 text-brand" /> : <Megaphone className="size-4 shrink-0 text-brand" />}
+                <span>{editingEventId ? "编辑活动信息" : "发布全新校园活动"}</span>
               </h2>
               <form onSubmit={handleCreateOrUpdateEvent} className="space-y-4">
                 <FieldGroup className="space-y-3">
@@ -663,8 +667,9 @@ export default function DashboardPage() {
                   </Field>
 
                   {eventMsg && (
-                    <p className="text-xs font-semibold text-destructive">
-                      ⚠️ {eventMsg}
+                    <p className="text-xs font-semibold text-destructive flex items-center gap-1">
+                      <AlertCircle className="size-3.5 shrink-0" />
+                      <span>{eventMsg}</span>
                     </p>
                   )}
 
@@ -694,7 +699,10 @@ export default function DashboardPage() {
 
             {/* 右侧：活动管理列表 */}
             <div className="lg:col-span-7 rounded-2xl border border-border bg-card p-6 shadow-xs flex flex-col min-h-125">
-              <h2 className="text-base font-bold text-foreground mb-4">📅 活动管理列表</h2>
+              <h2 className="text-base font-bold text-foreground mb-4 flex items-center gap-1.5">
+                <CalendarIcon className="size-4 shrink-0 text-brand" />
+                <span>活动管理列表</span>
+              </h2>
               <div className="divide-y divide-border flex-1">
                 {createdEvents.map((evt) => (
                   <div key={evt.id} className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
@@ -781,7 +789,7 @@ export default function DashboardPage() {
                 对校园活动类型进行创建、重命名或删除维护
               </p>
             </div>
-            <span className="text-xl">📂</span>
+            <FolderOpen className="size-6 text-brand shrink-0" />
           </Link>
           <Link
             href="/dashboard/accounts"
@@ -793,7 +801,7 @@ export default function DashboardPage() {
                 新建、修改、重置密码及移除系统账号
               </p>
             </div>
-            <span className="text-xl">👥</span>
+            <Users className="size-6 text-brand shrink-0" />
           </Link>
         </div>
       )}
