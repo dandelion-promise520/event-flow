@@ -1,11 +1,16 @@
 # 1. 依赖阶段
 FROM node:20-alpine AS deps
-# 安装 Python 和 C++ 编译工具以防 better-sqlite3 编译失败
-RUN apk add --no-cache libc6-compat python3 make g++
+# 替换为阿里云 Alpine 镜像源，并安装 Python 和 C++ 编译工具以防 better-sqlite3 编译失败
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
+    apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 
-# 安装 pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# 设置 Prisma 引擎国内镜像源
+ENV PRISMA_ENGINES_MIRROR=https://npmmirror.com/mirrors/prisma
+
+# 安装 pnpm 并设置淘宝镜像源
+RUN corepack enable && corepack prepare pnpm@latest --activate && \
+    pnpm config set registry https://registry.npmmirror.com
 
 # 复制依赖配置
 COPY package.json pnpm-lock.yaml .npmrc ./
