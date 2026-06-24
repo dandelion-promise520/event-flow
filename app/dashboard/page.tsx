@@ -615,8 +615,17 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {user.role === "ADMIN" && (
+      {user.role === "ADMIN" && activeTab === "stats" && (
         <div className="space-y-6">
+          {/* Bento box hero Welcome Card */}
+          <div className="relative overflow-hidden rounded-2xl border border-white/20 dark:border-white/5 bg-gradient-to-r from-brand/90 to-indigo-600/80 p-6 text-white shadow-md">
+            <div className="relative z-10">
+              <h2 className="text-lg font-bold">系统全局大盘中心</h2>
+              <p className="text-xs text-white/80 mt-1">您可在本页监控全校活动运作、电子门票核销、用户活跃状态，或通过右上角切换至活动工作区直接发布/编辑活动。</p>
+            </div>
+            <div className="absolute right-0 bottom-0 top-0 w-1/3 opacity-15 bg-radial from-white via-transparent to-transparent pointer-events-none" />
+          </div>
+
           {/* 快捷入口 */}
           <div className="grid gap-4 sm:grid-cols-2 mt-2">
             <Link
@@ -662,9 +671,9 @@ export default function DashboardPage() {
           {/* 核心指标网格 */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mt-6">
             {/* Card 1: 全站用户数 */}
-            <div className="rounded-xl border border-border bg-card p-5 shadow-xs transition-all duration-300 hover:shadow-xs hover:border-border/80">
+            <div className="rounded-xl backdrop-blur-md bg-white/70 dark:bg-card/45 border border-border/50 p-5 shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-brand/20">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-muted-foreground">全站用户数</span>
+                <span className="text-xs font-semibold text-muted-foreground">全站用户数</span>
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 dark:bg-blue-500/20">
                   <Users className="h-4 w-4" />
                 </div>
@@ -675,13 +684,13 @@ export default function DashboardPage() {
                 </span>
                 <span className="text-xs text-muted-foreground">位注册用户</span>
               </div>
-              <p className="mt-2 text-[10px] text-muted-foreground">包含学生、主办方与管理员</p>
+              <p className="mt-2 text-[10px] text-muted-foreground/80">包含学生、主办方与管理员</p>
             </div>
 
             {/* Card 2: 活动发布总量 */}
-            <div className="rounded-xl border border-border bg-card p-5 shadow-xs transition-all duration-300 hover:shadow-xs hover:border-border/80">
+            <div className="rounded-xl backdrop-blur-md bg-white/70 dark:bg-card/45 border border-border/50 p-5 shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-brand/20">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-muted-foreground">活动发布总量</span>
+                <span className="text-xs font-semibold text-muted-foreground">活动发布总量</span>
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/20">
                   <CalendarIcon className="h-4 w-4" />
                 </div>
@@ -692,39 +701,39 @@ export default function DashboardPage() {
                 </span>
                 <span className="text-xs text-muted-foreground">个活动</span>
               </div>
-              <p className="mt-2 text-[10px] text-muted-foreground">所有已发布和筹备中的校园活动</p>
+              <p className="mt-2 text-[10px] text-muted-foreground/80">所有已发布和筹备中的校园活动</p>
             </div>
 
             {/* Card 3: 门票预订与核销 */}
-            <div className="rounded-xl border border-border bg-card p-5 shadow-xs transition-all duration-300 hover:shadow-xs hover:border-border/80">
+            <div className="col-span-1 sm:col-span-2 rounded-xl backdrop-blur-md bg-white/70 dark:bg-card/45 border border-border/50 p-5 shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-brand/20">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-muted-foreground">门票预订与核销</span>
+                <span className="text-xs font-semibold text-muted-foreground">门票预订与核销</span>
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500 dark:bg-amber-500/20">
                   <Ticket className="h-4 w-4" />
                 </div>
               </div>
-              <div className="mt-3 flex items-baseline justify-between">
+              <div className="mt-3 flex items-baseline justify-between gap-4">
                 <div>
                   <span className="text-2xl font-bold tracking-tight text-foreground">
                     {adminStats?.stats.checkedInTickets ?? 0}
                   </span>
                   <span className="text-xs text-muted-foreground"> / {adminStats?.stats.totalTickets ?? 0} 张</span>
                 </div>
-                <span className="text-xs font-bold text-amber-500">{adminStats?.stats.checkInRate ?? 0}% 核销</span>
+                <span className="text-xs font-bold text-amber-500">{adminStats?.stats.checkInRate ?? 0}% 已核销</span>
               </div>
-              {/* 百分比条 */}
-              <div className="mt-3 h-1.5 w-full rounded-full bg-muted overflow-hidden">
+              {/* 圆角进度条 */}
+              <div className="mt-4 h-2 w-full rounded-full bg-muted overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-amber-500 transition-all duration-500"
+                  className="h-full rounded-full bg-gradient-to-r from-amber-400 to-amber-500 transition-all duration-500"
                   style={{ width: `${Math.min(adminStats?.stats.checkInRate ?? 0, 100)}%` }}
                 />
               </div>
             </div>
 
             {/* Card 4: 活动分类总数 */}
-            <div className="rounded-xl border border-border bg-card p-5 shadow-xs transition-all duration-300 hover:shadow-xs hover:border-border/80">
+            <div className="rounded-xl backdrop-blur-md bg-white/70 dark:bg-card/45 border border-border/50 p-5 shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-brand/20">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-muted-foreground">活动分类总数</span>
+                <span className="text-xs font-semibold text-muted-foreground">活动分类总数</span>
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-500 dark:bg-indigo-500/20">
                   <Layers className="h-4 w-4" />
                 </div>
@@ -735,7 +744,7 @@ export default function DashboardPage() {
                 </span>
                 <span className="text-xs text-muted-foreground">个分类</span>
               </div>
-              <p className="mt-2 text-[10px] text-muted-foreground">支持动态配置的学术/社团/文体等</p>
+              <p className="mt-2 text-[10px] text-muted-foreground/80">支持动态配置的学术/社团/文体等</p>
             </div>
           </div>
 
@@ -749,12 +758,12 @@ export default function DashboardPage() {
                   <Users className="h-4 w-4 text-brand" />
                   <span>最新加入成员</span>
                 </h2>
-                <div className="space-y-3.5">
+                <div className="backdrop-blur-xs bg-muted/20 dark:bg-muted/10 border border-border/30 rounded-xl p-3.5 space-y-3">
                   {adminStats?.latestUsers && adminStats.latestUsers.length > 0 ? (
                     adminStats.latestUsers.map((u) => (
-                      <div key={u.id} className="flex items-center justify-between rounded-lg border border-border/40 bg-muted/20 p-3 transition-colors hover:bg-muted/40">
+                      <div key={u.id} className="flex items-center justify-between rounded-lg border border-border/20 bg-card/40 p-2.5 transition-all duration-200 hover:bg-card/70 hover:translate-x-0.5">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand/10 text-brand font-bold text-xs">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-md bg-white/40 dark:bg-card/40 border border-border/40 text-brand font-bold text-xs shrink-0 shadow-xs">
                             {u.name.slice(0, 1).toUpperCase()}
                           </div>
                           <div>
@@ -766,7 +775,7 @@ export default function DashboardPage() {
                           <Badge
                             variant="secondary"
                             className={cn(
-                              "text-[10px] px-2 py-0.5 border font-medium",
+                              "text-[10px] px-2 py-0.5 border font-medium shrink-0",
                               u.role === "ADMIN" && "bg-rose-500/10 text-rose-500 hover:bg-rose-500/10 border-rose-500/20",
                               u.role === "ORGANIZER" && "bg-amber-500/10 text-amber-500 hover:bg-amber-500/10 border-amber-500/20",
                               u.role === "USER" && "bg-blue-500/10 text-blue-500 hover:bg-blue-500/10 border-blue-500/20"
@@ -774,7 +783,7 @@ export default function DashboardPage() {
                           >
                             {u.role === "ADMIN" ? "管理员" : u.role === "ORGANIZER" ? "主办方" : "学生"}
                           </Badge>
-                          <span className="text-[10px] text-muted-foreground font-mono">
+                          <span className="text-[10px] text-muted-foreground font-mono shrink-0">
                             {new Date(u.createdAt).toLocaleDateString("zh-CN", {
                               month: "numeric",
                               day: "numeric",
@@ -795,7 +804,7 @@ export default function DashboardPage() {
                   <Layers className="h-4 w-4 text-brand" />
                   <span>各分类活动占比</span>
                 </h2>
-                <div className="space-y-4">
+                <div className="backdrop-blur-xs bg-muted/20 dark:bg-muted/10 border border-border/30 rounded-xl p-4 space-y-4">
                   {adminStats?.categoryDistribution && adminStats.categoryDistribution.length > 0 ? (
                     adminStats.categoryDistribution.map((item) => {
                       const totalEvents = adminStats?.stats.totalEvents || 1
@@ -810,7 +819,7 @@ export default function DashboardPage() {
                           </div>
                           <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
                             <div
-                              className="h-full rounded-full bg-brand transition-all duration-500"
+                              className="h-full rounded-full bg-gradient-to-r from-brand to-indigo-500 transition-all duration-500"
                               style={{ width: `${percentage}%` }}
                             />
                           </div>
@@ -832,7 +841,7 @@ export default function DashboardPage() {
                   <Flame className="h-4 w-4 text-orange-500" />
                   <span>热门校园活动 Top 5</span>
                 </h2>
-                <div className="space-y-4">
+                <div className="relative pl-4 border-l border-border/80 space-y-5">
                   {adminStats?.popularEvents && adminStats.popularEvents.length > 0 ? (
                     adminStats.popularEvents.map((evt, idx) => {
                       const soldPercent = Math.min(
@@ -840,40 +849,42 @@ export default function DashboardPage() {
                         100
                       )
                       return (
-                        <div key={evt.id} className="space-y-2">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex gap-2">
-                              <span className={cn(
-                                "flex h-5 w-5 shrink-0 items-center justify-center rounded text-[10px] font-bold",
-                                idx === 0 && "bg-amber-500 text-amber-foreground",
-                                idx === 1 && "bg-slate-300 text-slate-800",
-                                idx === 2 && "bg-amber-700/80 text-white",
-                                idx > 2 && "bg-muted text-muted-foreground"
-                              )}>
-                                {idx + 1}
-                              </span>
-                              <div>
-                                <h3 className="text-xs font-bold text-foreground/90 line-clamp-1">{evt.title}</h3>
-                                <p className="text-[10px] text-muted-foreground mt-0.5">
-                                  主办方: {evt.organizer.name} | 地点: {evt.location}
-                                </p>
+                        <div key={evt.id} className="relative group transition-all duration-300 hover:translate-x-1">
+                          {/* 时间轴节点 */}
+                          <div className={cn(
+                            "absolute -left-[21px] top-1.5 flex h-2.5 w-2.5 items-center justify-center rounded-full border-2 border-background",
+                            idx === 0 && "bg-amber-500",
+                            idx === 1 && "bg-slate-400",
+                            idx === 2 && "bg-amber-700",
+                            idx > 2 && "bg-muted-foreground/40"
+                          )} />
+                          
+                          <div className="space-y-2">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex gap-2 min-w-0">
+                                <div>
+                                  <h3 className="text-xs font-bold text-foreground/90 line-clamp-1 group-hover:text-brand transition-colors">{evt.title}</h3>
+                                  <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
+                                    主办方: {evt.organizer.name} | 地点: {evt.location}
+                                  </p>
+                                </div>
                               </div>
+                              <span className="text-[10px] font-bold text-foreground shrink-0 font-mono">
+                                {evt.soldCount} / {evt.capacity} 张
+                              </span>
                             </div>
-                            <span className="text-[10px] font-bold text-foreground shrink-0 font-mono">
-                              {evt.soldCount} / {evt.capacity} 张
-                            </span>
-                          </div>
-                          {/* 售出比条 */}
-                          <div className="flex items-center gap-2 pl-7">
-                            <div className="h-1.5 flex-1 rounded-full bg-muted overflow-hidden">
-                              <div
-                                className="h-full rounded-full bg-orange-500 transition-all duration-500"
-                                style={{ width: `${soldPercent}%` }}
-                              />
+                            {/* 售出比条 */}
+                            <div className="flex items-center gap-2">
+                              <div className="h-1.5 flex-1 rounded-full bg-muted overflow-hidden">
+                                <div
+                                  className="h-full rounded-full bg-gradient-to-r from-orange-400 to-orange-500 transition-all duration-500"
+                                  style={{ width: `${soldPercent}%` }}
+                                />
+                              </div>
+                              <span className="text-[9px] font-semibold text-muted-foreground shrink-0 w-8 text-right font-mono">
+                                {soldPercent}%
+                              </span>
                             </div>
-                            <span className="text-[9px] font-semibold text-muted-foreground shrink-0 w-8 text-right font-mono">
-                              {soldPercent}%
-                            </span>
                           </div>
                         </div>
                       )
@@ -890,16 +901,19 @@ export default function DashboardPage() {
                   <Clock className="h-4 w-4 text-brand" />
                   <span>最新发布活动</span>
                 </h2>
-                <div className="space-y-3">
+                <div className="relative pl-4 border-l border-border/80 space-y-4">
                   {adminStats?.latestEvents && adminStats.latestEvents.length > 0 ? (
                     adminStats.latestEvents.map((evt) => (
-                      <div key={evt.id} className="flex items-center justify-between rounded-lg border border-border/40 bg-muted/10 p-3 hover:bg-muted/20 transition-colors">
+                      <div key={evt.id} className="relative group flex items-start justify-between rounded-lg border border-border/40 bg-muted/10 p-3 hover:bg-muted/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xs hover:border-brand/20">
+                        {/* 装饰用的小圆点 */}
+                        <div className="absolute -left-[21px] top-4.5 h-2 w-2 rounded-full border border-background bg-brand/60" />
+                        
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-border/60">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-border/60 shrink-0 font-medium bg-background/50">
                               {evt.category}
                             </Badge>
-                            <h4 className="text-xs font-bold text-foreground line-clamp-1">{evt.title}</h4>
+                            <h4 className="text-xs font-bold text-foreground line-clamp-1 group-hover:text-brand transition-colors">{evt.title}</h4>
                           </div>
                           <p className="text-[10px] text-muted-foreground mt-1 truncate">
                             主办方: {evt.organizer.name} | 地点: {evt.location}
@@ -923,7 +937,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {(user.role === "ORGANIZER" || user.role === "ADMIN") && (
+      {(user.role === "ORGANIZER" || (user.role === "ADMIN" && activeTab === "events")) && (
         <div className="space-y-6">
           <DashboardAnalytics
             events={createdEvents as unknown as EventData[]}
