@@ -13,7 +13,7 @@ RUN corepack enable && corepack prepare pnpm@latest --activate && \
     pnpm config set registry https://registry.npmmirror.com
 
 # 复制依赖配置
-COPY package.json pnpm-lock.yaml .npmrc ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 # 复制 prisma 文件夹以便生成 client
 COPY prisma ./prisma
 
