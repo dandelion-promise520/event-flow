@@ -156,7 +156,7 @@ export default function CategoriesManagement() {
             }}
             className="flex items-center gap-1.5"
           >
-            <Plus className="size-4" /> 添加分类
+            <Plus data-icon="inline-start" /> 添加分类
           </Button>
         </div>
 
@@ -185,7 +185,7 @@ export default function CategoriesManagement() {
                         onClick={() => handleEditClick(cat)}
                         className="h-8 px-2 text-xs"
                       >
-                        <Pencil className="size-3 mr-1" /> 编辑
+                        <Pencil data-icon="inline-start" /> 编辑
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger
@@ -195,7 +195,7 @@ export default function CategoriesManagement() {
                               size="sm"
                               className="h-8 px-2 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
                             >
-                              <Trash2 className="size-3 mr-1" /> 删除
+                              <Trash2 data-icon="inline-start" /> 删除
                             </Button>
                           }
                         />

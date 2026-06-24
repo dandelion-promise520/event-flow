@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
@@ -244,10 +245,10 @@ export default function Home() {
             <div className="absolute right-0 top-0 -z-10 h-32 w-32 bg-[radial-gradient(circle,var(--color-brand)/4%,transparent_70%)]" />
             
             <div className="flex flex-col gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-brand/5 px-2.5 py-0.5 text-[10px] font-medium text-brand max-w-fit">
-                <Ticket className="size-3.5" />
+              <Badge variant="secondary" className="bg-brand/5 text-brand hover:bg-brand/10 border-transparent">
+                <Ticket data-icon="inline-start" />
                 学生电子票夹
-              </span>
+              </Badge>
               <h3 className="text-lg font-bold text-foreground mt-2">我的电子门票</h3>
               <p className="text-xs text-muted-foreground max-w-[45ch]">
                 告别传统纸质门票，极简电子票码防伪设计，支持退票与实时状态同步。
@@ -303,16 +304,19 @@ export default function Home() {
                 </div>
 
                 {/* Badge Indicator */}
-                <span className={cn(
-                  "text-[9px] font-bold tracking-wider px-2 py-0.5 rounded-full border",
-                  ticketStatus === "UNUSED" && "bg-brand/10 border-brand/20 text-brand",
-                  ticketStatus === "USED" && "bg-brand/10 border-brand/20 text-brand dark:bg-brand/20 dark:border-brand/30",
-                  ticketStatus === "CANCELLED" && "bg-muted border-border text-muted-foreground"
-                )}>
+                <Badge
+                  variant={ticketStatus === "CANCELLED" ? "outline" : "secondary"}
+                  className={cn(
+                    "text-[9px] font-bold tracking-wider px-2 py-0.5 rounded-full border-transparent",
+                    ticketStatus === "UNUSED" && "bg-brand/10 text-brand hover:bg-brand/15",
+                    ticketStatus === "USED" && "bg-brand/10 text-brand hover:bg-brand/15 dark:bg-brand/20 dark:text-brand",
+                    ticketStatus === "CANCELLED" && "bg-muted text-muted-foreground"
+                  )}
+                >
                   {ticketStatus === "UNUSED" && "未使用"}
                   {ticketStatus === "USED" && "已入场"}
                   {ticketStatus === "CANCELLED" && "已取消"}
-                </span>
+                </Badge>
               </div>
             </div>
           </div>
@@ -320,10 +324,10 @@ export default function Home() {
           {/* Cell 2: Live Analytics (Col span 1) */}
           <div className="relative flex flex-col justify-between overflow-hidden rounded-3xl border border-border/40 bg-card p-6 shadow-xs group">
             <div>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-2.5 py-0.5 text-[10px] font-medium text-brand max-w-fit">
-                <Activity className="size-3.5" />
+              <Badge variant="secondary" className="bg-brand/10 text-brand hover:bg-brand/15 border-transparent">
+                <Activity data-icon="inline-start" />
                 数据实时看板
-              </span>
+              </Badge>
               <h3 className="text-lg font-bold text-foreground mt-3">核心数据大屏</h3>
               <p className="text-xs text-muted-foreground">
                 实时的名额监控，精准查看每场活动的报名进度。
@@ -353,10 +357,10 @@ export default function Home() {
           {/* Cell 3: Scan Simulation Box (Col span 1) */}
           <div className="relative flex flex-col justify-between overflow-hidden rounded-3xl border border-border/40 bg-card p-6 shadow-xs group">
             <div>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-500/10 px-2.5 py-0.5 text-[10px] font-medium text-purple-600 max-w-fit">
-                <Terminal className="size-3.5" />
+              <Badge variant="secondary" className="bg-purple-500/10 text-purple-600 dark:text-purple-400 hover:bg-purple-500/15 border-transparent">
+                <Terminal data-icon="inline-start" />
                 核销端模拟器
-              </span>
+              </Badge>
               <h3 className="text-lg font-bold text-foreground mt-3">核销与状态控制</h3>
               <p className="text-xs text-muted-foreground">
                 在此模拟主办方核销门票的操作，改变上方电子门票的状态。
@@ -376,9 +380,9 @@ export default function Home() {
                 )}
               >
                 {isScanning ? (
-                  <RefreshCw className="size-3.5 animate-spin" />
+                  <RefreshCw data-icon="inline-start" className="animate-spin" />
                 ) : (
-                  <Play className="size-3.5" />
+                  <Play data-icon="inline-start" />
                 )}
                 {isScanning ? "核销中..." : "模拟扫码签到"}
               </Button>
@@ -388,17 +392,18 @@ export default function Home() {
                   onClick={cancelTicket}
                   disabled={ticketStatus === "CANCELLED" || isScanning}
                   variant="outline"
-                  className="flex-1 h-9 rounded-xl text-[11px] font-semibold border-border/50 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/10"
+                  className="flex-1 h-9 rounded-xl text-[11px] font-semibold border-border/50 text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/20"
                 >
                   模拟用户退票
                 </Button>
                 <Button
                   onClick={resetTicket}
                   variant="outline"
-                  className="size-9 rounded-xl flex items-center justify-center border-border/50 text-muted-foreground hover:text-foreground"
+                  size="icon"
+                  className="rounded-xl border-border/50 text-muted-foreground hover:text-foreground"
                   title="重置门票"
                 >
-                  <RefreshCw className="size-3.5" />
+                  <RefreshCw />
                 </Button>
               </div>
             </div>
@@ -407,10 +412,10 @@ export default function Home() {
           {/* Cell 4: Notifications (Col span 2) */}
           <div className="relative flex flex-col justify-between overflow-hidden rounded-3xl border border-border/40 bg-card p-6 shadow-xs md:col-span-2 group">
             <div className="flex flex-col gap-1">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-500/10 px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground max-w-fit">
-                <Clock className="size-3.5" />
+              <Badge variant="secondary" className="bg-zinc-500/10 text-muted-foreground hover:bg-zinc-500/15 border-transparent">
+                <Clock data-icon="inline-start" />
                 实时动态通知
-              </span>
+              </Badge>
               <h3 className="text-lg font-bold text-foreground mt-3">通知与事件流水</h3>
               <p className="text-xs text-muted-foreground">
                 模拟实时变化的系统日志。每当有活动审核、门票预订或入场核销，这里会动态增加流水。
@@ -451,26 +456,35 @@ export default function Home() {
         </div>
 
         {/* Apple-style Segmented Control */}
-        <div className="mt-8 p-1 rounded-2xl bg-muted/60 border border-border/40 backdrop-blur-xs max-w-fit mx-auto flex gap-0.5 items-center shadow-xs">
+        <ToggleGroup
+          value={[selectedCategory]}
+          onValueChange={(val) => {
+            if (val && val.length > 0) {
+              setSelectedCategory(val[0]);
+            } else {
+              setSelectedCategory("");
+            }
+          }}
+          className="mt-8 p-1 rounded-2xl bg-muted/60 border border-border/40 backdrop-blur-xs max-w-fit mx-auto shadow-xs"
+        >
           {dbCategories.map((cat) => {
             const isSelected = selectedCategory === cat;
             return (
-              <Button
+              <ToggleGroupItem
                 key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                variant="ghost"
+                value={cat}
                 className={cn(
-                  "h-8 rounded-[10px] px-4 text-xs font-medium transition-all duration-200",
+                  "h-8 rounded-[10px] px-4 text-xs font-medium transition-all duration-200 cursor-pointer",
                   isSelected
                     ? "bg-background text-foreground shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.2)] hover:bg-background"
                     : "text-muted-foreground hover:text-foreground hover:bg-background/20"
                 )}
               >
                 {cat || "全部活动"}
-              </Button>
+              </ToggleGroupItem>
             );
           })}
-        </div>
+        </ToggleGroup>
 
         {/* Event Grid */}
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

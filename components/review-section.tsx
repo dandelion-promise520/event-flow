@@ -117,7 +117,7 @@ export default function ReviewSection({ eventId }: ReviewSectionProps) {
         </h3>
         {avgRating && (
           <Badge variant="secondary" className="gap-1 bg-amber-50 text-amber-700 hover:bg-amber-50/80 dark:bg-amber-950/20 dark:text-amber-400 border-transparent font-medium">
-            <Star className="size-4 fill-amber-500 stroke-amber-500" />
+            <Star data-icon="inline-start" className="fill-amber-500 stroke-amber-500" />
             平均分 {avgRating}
           </Badge>
         )}
@@ -186,7 +186,7 @@ export default function ReviewSection({ eventId }: ReviewSectionProps) {
                 <div className="flex items-center gap-2 animate-none">
                   <span className="font-semibold text-foreground">{r.user?.name || "匿名用户"}</span>
                   <Badge variant="secondary" className="scale-90 font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 border-transparent inline-flex items-center gap-1">
-                    <Check className="size-3 shrink-0" /> 已核销用户
+                    <Check data-icon="inline-start" className="shrink-0" /> 已核销用户
                   </Badge>
                 </div>
                 <span>{new Date(r.createdAt).toLocaleString()}</span>

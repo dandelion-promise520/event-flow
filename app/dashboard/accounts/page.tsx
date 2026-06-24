@@ -195,7 +195,7 @@ export default function AccountsManagement() {
             <p className="mt-1 text-sm text-muted-foreground">在此对系统内部的管理员（ADMIN）、主办方（ORGANIZER）和普通学生（USER）进行维护。</p>
           </div>
           <Button onClick={handleOpenCreate} className="flex items-center gap-1.5 self-start sm:self-auto">
-            <Plus className="size-4" /> 新建账号
+            <Plus data-icon="inline-start" /> 新建账号
           </Button>
         </div>
 
@@ -263,7 +263,7 @@ export default function AccountsManagement() {
                   <td className="p-4 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button variant="outline" size="sm" onClick={() => handleOpenEdit(u)} className="h-8 px-2 text-xs">
-                        <Pencil className="size-3 mr-1" /> 编辑
+                        <Pencil data-icon="inline-start" /> 编辑
                       </Button>
                       {u.id !== adminUser.id ? (
                         <AlertDialog>
@@ -274,7 +274,7 @@ export default function AccountsManagement() {
                                 size="sm"
                                 className="h-8 px-2 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
                               >
-                                <Trash2 className="size-3 mr-1" /> 删除
+                                <Trash2 data-icon="inline-start" /> 删除
                               </Button>
                             }
                           />

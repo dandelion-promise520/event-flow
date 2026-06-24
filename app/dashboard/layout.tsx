@@ -28,7 +28,7 @@ export default function DashboardLayout({
   if (loading) {
     return (
       <div className="flex h-[calc(100vh-4rem)] items-center justify-center bg-background">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
       </div>
     )
   }

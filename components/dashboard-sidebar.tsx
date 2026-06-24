@@ -104,7 +104,7 @@ export default function DashboardSidebar() {
       <SidebarHeader className={`border-b border-border/50 ${isCollapsed ? "p-2" : "p-4"}`}>
         <div className={`flex items-center font-bold text-foreground w-full ${isCollapsed ? "justify-center" : "justify-between"}`}>
           {!isCollapsed && <span className="truncate text-sm pl-1">EventFlow 控制台</span>}
-          <SidebarTrigger className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0" />
+          <SidebarTrigger className="size-8 text-muted-foreground hover:text-foreground shrink-0" />
         </div>
       </SidebarHeader>
       
@@ -123,7 +123,7 @@ export default function DashboardSidebar() {
                       tooltip={item.title}
                       render={<Link href={item.href} />}
                     >
-                      <Icon className="h-4 w-4 shrink-0" />
+                      <Icon />
                       <span>{item.title}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -145,7 +145,7 @@ export default function DashboardSidebar() {
                   onClick={handleLogout}
                   className="w-full h-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                 >
-                  <LogOut className="h-4 w-4" />
+                  <LogOut />
                 </Button>
               }
             />
@@ -169,10 +169,10 @@ export default function DashboardSidebar() {
               variant="ghost"
               size="icon"
               onClick={handleLogout}
-              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
               title="退出登录"
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut />
             </Button>
           </div>
         )}

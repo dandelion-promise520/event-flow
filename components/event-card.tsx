@@ -4,6 +4,15 @@ import { MapPin, Calendar, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+
 export interface EventItem {
   id: string;
   title: string;
@@ -31,7 +40,7 @@ export default function EventCard({ event, priority = false }: EventProps) {
   });
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:border-border/80 hover:shadow-lg">
+    <Card className="group relative flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-border/80 hover:shadow-lg">
       <div className="aspect-video w-full bg-muted overflow-hidden relative">
         {event.coverUrl ? (
           <Image
@@ -51,13 +60,17 @@ export default function EventCard({ event, priority = false }: EventProps) {
           {event.category}
         </Badge>
       </div>
-      <div className="flex flex-1 flex-col p-5">
-        <h3 className="font-bold text-foreground group-hover:text-brand line-clamp-1 transition-colors">
+      <CardHeader className="px-5 pt-5 pb-0">
+        <CardTitle className="text-foreground group-hover:text-brand transition-colors line-clamp-1">
           {event.title}
-        </h3>
-        <p className="mt-2 text-xs text-muted-foreground line-clamp-2">{event.description}</p>
-        
-        <div className="mt-4 flex flex-col gap-2 text-xs text-muted-foreground">
+        </CardTitle>
+        <CardDescription className="mt-2 text-xs text-muted-foreground line-clamp-2">
+          {event.description}
+        </CardDescription>
+      </CardHeader>
+      
+      <CardContent className="flex-1 px-5 pt-4 pb-0 flex flex-col gap-4">
+        <div className="flex flex-col gap-2 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <Calendar className="size-3.5 text-muted-foreground/80" />
             <span>{dateStr}</span>
@@ -68,7 +81,7 @@ export default function EventCard({ event, priority = false }: EventProps) {
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1.5">
           <div className="flex justify-between text-xs font-medium text-muted-foreground">
             <span className="flex items-center gap-1">
               <Users className="size-3.5" />
@@ -83,7 +96,9 @@ export default function EventCard({ event, priority = false }: EventProps) {
             />
           </div>
         </div>
+      </CardContent>
 
+      <CardFooter className="px-5 pb-5 pt-0 border-t-0 bg-transparent">
         <Button
           render={<Link href={`/events/${event.id}`} />}
           variant="outline"
@@ -92,7 +107,7 @@ export default function EventCard({ event, priority = false }: EventProps) {
         >
           查看详情与预订
         </Button>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }

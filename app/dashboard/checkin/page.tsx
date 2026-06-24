@@ -88,7 +88,7 @@ export default function CheckinPage() {
   if (loading || !user) {
     return (
       <div className="flex h-[calc(100vh-6rem)] items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -97,13 +97,13 @@ export default function CheckinPage() {
     success: {
       alertVariant: "default" as const,
       className: "border-emerald-100 bg-emerald-50/60 text-emerald-800 dark:border-emerald-950/40 dark:bg-emerald-950/10 dark:text-emerald-400",
-      icon: <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />,
+      icon: <CheckCircle2 className="text-emerald-600 dark:text-emerald-400" />,
       title: "核销成功",
     },
     error: {
       alertVariant: "destructive" as const,
       className: "",
-      icon: <AlertCircle className="size-4" />,
+      icon: <AlertCircle />,
       title: "核销失败",
     },
   }
@@ -171,16 +171,16 @@ export default function CheckinPage() {
               <Button
                 type="button"
                 variant="ghost"
-                size="icon"
+                size="icon-xs"
                 className={cn(
-                  "size-5 rounded text-current hover:bg-muted/10",
+                  "rounded text-current hover:bg-muted/10",
                   checkinMsg.type === "success"
                     ? "text-emerald-600/70 hover:bg-emerald-100 hover:text-emerald-800 dark:text-emerald-400/70 dark:hover:bg-emerald-950/40"
                     : "text-destructive/70 hover:bg-destructive/10"
                 )}
                 onClick={() => setCheckinMsg(null)}
               >
-                <X className="size-3" />
+                <X />
               </Button>
             </AlertAction>
           </Alert>

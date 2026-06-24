@@ -6,6 +6,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -104,7 +110,7 @@ export default function EventDetail({ params }: PageProps) {
         返回大厅
       </Link>
 
-      <div className="overflow-hidden rounded-3xl border border-border bg-card">
+      <Card className="overflow-hidden">
         {event.coverUrl && (
           <div className="relative aspect-[2.39/1] w-full bg-muted overflow-hidden">
             <Image
@@ -118,13 +124,15 @@ export default function EventDetail({ params }: PageProps) {
           </div>
         )}
 
-        <div className="p-8">
-          <Badge className="bg-brand/10 text-brand hover:bg-brand/15 border-transparent">
+        <CardHeader className="px-8 pt-8 pb-0">
+          <Badge className="bg-brand/10 text-brand hover:bg-brand/15 border-transparent w-fit">
             {event.category}
           </Badge>
-          <h1 className="mt-4 text-2xl md:text-3xl font-extrabold text-foreground">{event.title}</h1>
-          
-          <div className="mt-6 grid gap-4 border-y border-border/60 py-6 md:grid-cols-2">
+          <CardTitle className="mt-4 text-2xl md:text-3xl font-extrabold text-foreground">{event.title}</CardTitle>
+        </CardHeader>
+
+        <CardContent className="px-8 pb-8 pt-6">
+          <div className="grid gap-4 border-y border-border/60 py-6 md:grid-cols-2">
             <div className="flex items-center gap-3">
               <div className="flex size-10 items-center justify-center rounded-xl bg-muted text-muted-foreground border border-border">
                 <Calendar className="size-5" />
@@ -161,7 +169,7 @@ export default function EventDetail({ params }: PageProps) {
              <div className="flex flex-col gap-2 min-w-[200px]">
               {success ? (
                 <Badge variant="secondary" className="bg-brand/10 text-brand border-transparent font-bold py-1.5 px-3">
-                  <CheckCircle2 className="size-4" />
+                  <CheckCircle2 data-icon="inline-start" />
                   预约成功
                 </Badge>
               ) : (
@@ -183,8 +191,8 @@ export default function EventDetail({ params }: PageProps) {
               )}
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       <ReviewSection eventId={id} />
     </div>

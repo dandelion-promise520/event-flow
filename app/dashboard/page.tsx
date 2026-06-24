@@ -19,6 +19,7 @@ import {
   Clock
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import DashboardAnalytics from "@/components/dashboard-analytics"
 import type { EventData, TicketData } from "@/lib/analytics-utils"
 
@@ -946,13 +947,16 @@ export default function DashboardPage() {
 
           <div className="grid gap-8 lg:grid-cols-12 mt-6">
             {/* 左侧：发布与编辑表单 */}
-            <div id="event-form-panel" className="lg:col-span-5 rounded-2xl border border-border bg-card p-6 shadow-xs h-fit">
-              <h2 className="text-base font-bold text-foreground mb-4 flex items-center gap-1.5">
-                {editingEventId ? <Pencil className="size-4 shrink-0 text-brand" /> : <Megaphone className="size-4 shrink-0 text-brand" />}
-                <span>{editingEventId ? "编辑活动信息" : "发布全新校园活动"}</span>
-              </h2>
-              <form onSubmit={handleCreateOrUpdateEvent} className="space-y-4">
-                <FieldGroup className="space-y-3">
+            <Card id="event-form-panel" className="lg:col-span-5 h-fit">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-1.5">
+                  {editingEventId ? <Pencil className="size-4 shrink-0 text-brand" /> : <Megaphone className="size-4 shrink-0 text-brand" />}
+                  <span>{editingEventId ? "编辑活动信息" : "发布全新校园活动"}</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleCreateOrUpdateEvent} className="flex flex-col gap-4">
+                  <FieldGroup className="gap-3">
                   <Field>
                     <FieldLabel>活动名称</FieldLabel>
                     <Input
@@ -1117,7 +1121,7 @@ export default function DashboardPage() {
                       className="h-10 flex-1 cursor-pointer font-bold bg-brand text-brand-foreground hover:bg-brand/90"
                       disabled={!selectedDate || eventMsg === "活动开始时间不能早于当前时间"}
                     >
-                      {!editingEventId && <Plus className="inline-start shrink-0 mr-1.5 h-4 w-4" />}
+                      {!editingEventId && <Plus data-icon="inline-start" />}
                       {editingEventId ? "保存修改" : "确认发布活动"}
                     </Button>
                     {editingEventId && (
@@ -1133,15 +1137,19 @@ export default function DashboardPage() {
                   </div>
                 </FieldGroup>
               </form>
-            </div>
+            </CardContent>
+          </Card>
 
             {/* 右侧：活动管理列表 */}
-            <div className="lg:col-span-7 rounded-2xl border border-border bg-card p-6 shadow-xs flex flex-col min-h-125">
-              <h2 className="text-base font-bold text-foreground mb-4 flex items-center gap-1.5">
-                <CalendarIcon className="size-4 shrink-0 text-brand" />
-                <span>活动管理列表</span>
-              </h2>
-              <div className="divide-y divide-border flex-1">
+            <Card className="lg:col-span-7 flex flex-col min-h-125">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-1.5">
+                  <CalendarIcon className="size-4 shrink-0 text-brand" />
+                  <span>活动管理列表</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex-1">
+                <div className="divide-y divide-border">
                 {createdEvents.map((evt) => (
                   <div key={evt.id} className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
                     <div>
@@ -1209,8 +1217,9 @@ export default function DashboardPage() {
                     目前未发布任何活动
                   </p>
                 )}
-              </div>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       )}
@@ -1234,35 +1243,35 @@ export default function DashboardPage() {
               <AlertDialogDescription>向所有订购该活动门票的用户发送站内信通知。</AlertDialogDescription>
             </AlertDialogHeader>
 
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs font-bold text-foreground/80">通知标题</label>
+            <FieldGroup>
+              <Field>
+                <FieldLabel>通知标题</FieldLabel>
                 <Input
                   type="text"
                   placeholder="请输入通知标题，如：活动场地变更"
                   value={broadcastTitle}
                   onChange={(e) => setBroadcastTitle(e.target.value)}
                   required
-                  className="mt-1 bg-background text-foreground"
+                  className="bg-background text-foreground"
                 />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-foreground/80">通知内容</label>
+              </Field>
+              <Field>
+                <FieldLabel>通知内容</FieldLabel>
                 <Textarea
                   placeholder="请输入通知的详细内容..."
                   value={broadcastContent}
                   onChange={(e) => setBroadcastContent(e.target.value)}
                   required
                   rows={4}
-                  className="mt-1 bg-background text-foreground"
+                  className="bg-background text-foreground"
                 />
-              </div>
+              </Field>
               {broadcastMsg && (
                 <p className={cn("text-xs font-semibold", broadcastMsg.includes("成功") ? "text-emerald-600" : "text-destructive")}>
                   {broadcastMsg}
                 </p>
               )}
-            </div>
+            </FieldGroup>
 
             <AlertDialogFooter>
               <AlertDialogCancel

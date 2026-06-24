@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Loader2, Download, Calendar as CalendarIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -135,7 +136,7 @@ export default function TicketsReportPage() {
   if (loading || !user) {
     return (
       <div className="flex h-[calc(100vh-6rem)] items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
       </div>
     )
   }
@@ -245,7 +246,7 @@ export default function TicketsReportPage() {
             variant="outline"
             className="flex h-8 w-fit items-center gap-1 self-end border-border px-3 text-[11px] font-semibold text-muted-foreground hover:bg-muted md:self-auto"
           >
-            <Download className="h-3.5 w-3.5" />
+            <Download data-icon="inline-start" />
             导出 CSV 数据
           </Button>
         </div>
@@ -274,18 +275,15 @@ export default function TicketsReportPage() {
                     {t.eventTitle}
                   </td>
                   <td className="p-3">
-                    <span
-                      className={cn(
-                        "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold border",
-                        t.status === "USED"
-                          ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600"
-                          : t.status === "UNUSED"
-                            ? "border-border bg-secondary text-secondary-foreground"
-                            : "border-destructive/30 bg-destructive/10 text-destructive"
-                      )}
-                    >
-                      {t.status === "USED" ? "已核销" : t.status === "UNUSED" ? "未使用" : "已取消"}
-                    </span>
+                     <Badge
+                       variant={t.status === "UNUSED" ? "secondary" : t.status === "USED" ? "secondary" : "destructive"}
+                       className={cn(
+                         "text-[10px] font-bold border-transparent",
+                         t.status === "USED" && "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 hover:bg-emerald-50/80"
+                       )}
+                     >
+                       {t.status === "USED" ? "已核销" : t.status === "UNUSED" ? "未使用" : "已取消"}
+                     </Badge>
                   </td>
                   <td className="p-3 text-[10px] text-muted-foreground/80">
                     {new Date(t.bookedAt).toLocaleString("zh-CN")}
