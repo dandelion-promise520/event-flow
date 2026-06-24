@@ -9,7 +9,7 @@ WORKDIR /app
 ENV PRISMA_ENGINES_MIRROR=https://npmmirror.com/mirrors/prisma
 
 # 安装 pnpm 并设置淘宝镜像源
-RUN corepack enable && corepack prepare pnpm@latest --activate && \
+RUN corepack enable && corepack prepare pnpm@9 --activate && \
     pnpm config set registry https://registry.npmmirror.com
 
 # 复制依赖配置
@@ -23,7 +23,7 @@ RUN pnpm install --frozen-lockfile
 # 2. 构建阶段
 FROM node:20-alpine AS builder
 WORKDIR /app
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@9 --activate
 
 # 复制依赖和生成的 client
 COPY --from=deps /app/node_modules ./node_modules
@@ -48,7 +48,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@9 --activate
 
 # 复制编译产物和必要文件
 COPY --from=builder /app/public ./public
