@@ -50,6 +50,8 @@ export async function GET(req: Request) {
       location: e.location,
       category: e.category,
       startTime: e.startTime.toISOString(),
+      description: e.description,
+      coverUrl: e.coverUrl,
       soldCount: e.tickets.length,
       checkedInCount: e.tickets.filter((t) => t.status === "USED").length,
     }));
