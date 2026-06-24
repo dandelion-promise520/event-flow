@@ -146,6 +146,7 @@ export default function DashboardPage() {
   const [adminStats, setAdminStats] = useState<AdminStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [dbCategories, setDbCategories] = useState<{ label: string; value: string }[]>([])
+  const [activeTab, setActiveTab] = useState<"stats" | "events">("stats")
 
   // 发布/编辑活动表单状态
   const [title, setTitle] = useState("")
@@ -181,12 +182,30 @@ export default function DashboardPage() {
         const data = await res.json()
         setTickets(data)
       } else if (currUser.role === "ADMIN") {
-        const res = await fetch(`/api/admin/stats?adminId=${currUser.id}`)
-        const data = await res.json()
-        if (data.success) {
-          setAdminStats(data)
+        const [statsRes, eventRes] = await Promise.all([
+          fetch(`/api/admin/stats?adminId=${currUser.id}`),
+          fetch(`/api/events/dashboard?organizerId=${currUser.id}`)
+        ])
+        const [statsData, eventData] = await Promise.all([
+          statsRes.json(),
+          eventRes.json()
+        ])
+
+        if (statsData.success) {
+          setAdminStats(statsData)
         } else {
-          toast.error(data.message || "获取大盘数据失败")
+          toast.error(statsData.message || "获取大盘数据失败")
+        }
+
+        if (eventData.events) {
+          const formatted = eventData.events.map((e: EventType) => ({
+            ...e,
+            bookedCount: e.soldCount,
+          }))
+          setCreatedEvents(formatted)
+        }
+        if (eventData.tickets) {
+          setDashboardTickets(eventData.tickets)
         }
       } else {
         const res = await fetch(`/api/events/dashboard?organizerId=${currUser.id}`)
@@ -509,11 +528,39 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">控制台概览</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          欢迎回来，{user.name} ({user.role === "USER" ? "学生" : user.role === "ADMIN" ? "系统管理员" : "主办方"})
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/50 pb-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">控制台概览</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            欢迎回来，{user.name} ({user.role === "USER" ? "学生" : user.role === "ADMIN" ? "系统管理员" : "主办方"})
+          </p>
+        </div>
+        {user.role === "ADMIN" && (
+          <div className="inline-flex h-9 items-center gap-1 rounded-full bg-muted/60 p-1 border border-border/40 select-none">
+            <button
+              onClick={() => setActiveTab("stats")}
+              className={cn(
+                "rounded-full px-4 py-1 text-xs font-bold transition-all duration-200 cursor-pointer",
+                activeTab === "stats"
+                  ? "bg-card text-brand shadow-xs border border-border/20"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              系统统计大盘
+            </button>
+            <button
+              onClick={() => setActiveTab("events")}
+              className={cn(
+                "rounded-full px-4 py-1 text-xs font-bold transition-all duration-200 cursor-pointer",
+                activeTab === "events"
+                  ? "bg-card text-brand shadow-xs border border-border/20"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              活动发布与管理
+            </button>
+          </div>
+        )}
       </div>
 
       {user.role === "USER" && (
@@ -565,284 +612,6 @@ export default function DashboardPage() {
               目前还没有订购任何活动门票
             </p>
           )}
-        </div>
-      )}
-
-      {user.role === "ORGANIZER" && (
-        <div className="space-y-6">
-          <DashboardAnalytics
-            events={createdEvents as unknown as EventData[]}
-            tickets={dashboardTickets}
-          />
-
-          <div className="grid gap-8 lg:grid-cols-12 mt-6">
-            {/* 左侧：发布与编辑表单 */}
-            <div id="event-form-panel" className="lg:col-span-5 rounded-2xl border border-border bg-card p-6 shadow-xs h-fit">
-              <h2 className="text-base font-bold text-foreground mb-4 flex items-center gap-1.5">
-                {editingEventId ? <Pencil className="size-4 shrink-0 text-brand" /> : <Megaphone className="size-4 shrink-0 text-brand" />}
-                <span>{editingEventId ? "编辑活动信息" : "发布全新校园活动"}</span>
-              </h2>
-              <form onSubmit={handleCreateOrUpdateEvent} className="space-y-4">
-                <FieldGroup className="space-y-3">
-                  <Field>
-                    <FieldLabel>活动名称</FieldLabel>
-                    <Input
-                      type="text"
-                      placeholder="输入活动主题..."
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      required
-                      className="bg-background text-foreground"
-                    />
-                  </Field>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <Field>
-                      <FieldLabel>活动类别</FieldLabel>
-                      <Select value={category} onValueChange={(val) => setCategory(val || "")}>
-                        <SelectTrigger className="bg-background text-foreground">
-                          <SelectValue placeholder="选择分类" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-lg border border-border bg-popover shadow-md">
-                          <SelectGroup>
-                            {(dbCategories.length > 0 ? dbCategories : [
-                              { label: "学术讲座", value: "学术讲座" },
-                              { label: "文体比赛", value: "文体比赛" },
-                              { label: "社团活动", value: "社团活动" },
-                            ]).map((cat) => (
-                              <SelectItem key={cat.value} value={cat.value}>
-                                {cat.label}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </Field>
-
-                    <Field>
-                      <FieldLabel>人数上限容量</FieldLabel>
-                      <Input
-                        type="number"
-                        min="1"
-                        placeholder="e.g. 100"
-                        value={capacity}
-                        onChange={(e) => setCapacity(e.target.value)}
-                        required
-                        className="bg-background text-foreground"
-                      />
-                    </Field>
-                  </div>
-
-                  <Field>
-                    <FieldLabel>举办地点</FieldLabel>
-                    <Input
-                      type="text"
-                      placeholder="e.g. 大礼堂 / 线上腾讯会议..."
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      required
-                      className="bg-background text-foreground"
-                    />
-                  </Field>
-
-                  <Field>
-                    <FieldLabel>开始时间 (24小时制)</FieldLabel>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Popover>
-                        <PopoverTrigger
-                          className={cn(
-                            "flex h-9 cursor-pointer items-center justify-start gap-1.5 rounded-lg border border-border bg-background py-2 pr-2.5 pl-3 text-left text-xs text-muted-foreground outline-hidden transition-colors select-none hover:bg-muted",
-                            !selectedDate && "text-muted-foreground/80"
-                          )}
-                        >
-                          <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground/85" />
-                          {selectedDate ? (
-                            format(selectedDate, "yyyy-MM-dd")
-                          ) : (
-                            "选择活动日期"
-                          )}
-                        </PopoverTrigger>
-                        <PopoverContent
-                          className="w-auto rounded-lg border border-border bg-popover p-0 shadow-md"
-                          align="start"
-                        >
-                          <Calendar
-                            mode="single"
-                            selected={selectedDate}
-                            onSelect={handleDateSelect}
-                            locale={zhCN}
-                            className="bg-popover text-foreground"
-                          />
-                        </PopoverContent>
-                      </Popover>
-
-                      <Select value={selectedHour} onValueChange={handleHourChange}>
-                        <SelectTrigger className="h-9 w-16 bg-background text-xs text-foreground">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-48 rounded-lg border border-border bg-popover shadow-md">
-                          {Array.from({ length: 24 }).map((_, i) => {
-                            const h = String(i).padStart(2, "0")
-                            return (
-                              <SelectItem key={h} value={h}>
-                                {h} 时
-                              </SelectItem>
-                            )
-                          })}
-                        </SelectContent>
-                      </Select>
-
-                      <Select value={selectedMinute} onValueChange={handleMinuteChange}>
-                        <SelectTrigger className="h-9 w-16 bg-background text-xs text-foreground">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-48 rounded-lg border border-border bg-popover shadow-md">
-                          {Array.from({ length: 60 }).map((_, i) => {
-                            const m = String(i).padStart(2, "0")
-                            return (
-                              <SelectItem key={m} value={m}>
-                                {m} 分
-                              </SelectItem>
-                            )
-                          })}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </Field>
-
-                  <Field>
-                    <FieldLabel>活动宣传海报 (可选)</FieldLabel>
-                    <FileUploader
-                      value={uploadedFiles}
-                      onChange={setUploadedFiles}
-                      onUpload={handleImageUpload}
-                      maxCount={1}
-                      maxSize={2}
-                      multiple={false}
-                      accept="image/*"
-                      className="border-dashed"
-                    />
-                  </Field>
-
-                  <Field>
-                    <FieldLabel>活动详细描述</FieldLabel>
-                    <Textarea
-                      placeholder="输入活动详情、流程安排、注意事项等..."
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      rows={4}
-                      className="bg-background text-foreground"
-                    />
-                  </Field>
-
-                  {eventMsg && (
-                    <p className="text-xs font-semibold text-destructive flex items-center gap-1">
-                      <AlertCircle className="size-3.5 shrink-0" />
-                      <span>{eventMsg}</span>
-                    </p>
-                  )}
-
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      type="submit"
-                      className="h-10 flex-1 cursor-pointer font-bold bg-brand text-brand-foreground hover:bg-brand/90"
-                      disabled={!selectedDate || eventMsg === "活动开始时间不能早于当前时间"}
-                    >
-                      {!editingEventId && <Plus className="inline-start shrink-0 mr-1.5 h-4 w-4" />}
-                      {editingEventId ? "保存修改" : "确认发布活动"}
-                    </Button>
-                    {editingEventId && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleCancelEdit}
-                        className="h-10 cursor-pointer font-semibold"
-                      >
-                        取消编辑
-                      </Button>
-                    )}
-                  </div>
-                </FieldGroup>
-              </form>
-            </div>
-
-            {/* 右侧：活动管理列表 */}
-            <div className="lg:col-span-7 rounded-2xl border border-border bg-card p-6 shadow-xs flex flex-col min-h-125">
-              <h2 className="text-base font-bold text-foreground mb-4 flex items-center gap-1.5">
-                <CalendarIcon className="size-4 shrink-0 text-brand" />
-                <span>活动管理列表</span>
-              </h2>
-              <div className="divide-y divide-border flex-1">
-                {createdEvents.map((evt) => (
-                  <div key={evt.id} className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
-                    <div>
-                      <h3 className="text-sm font-bold text-foreground/90">{evt.title}</h3>
-                      <p className="mt-1 text-[11px] text-muted-foreground/80">
-                        地点: {evt.location} | 容量: {evt.capacity} 人 | 已售: {evt.bookedCount} 张
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleStartEdit(evt)}
-                        className="flex h-8 items-center gap-1 px-3 text-[11px] font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
-                      >
-                        <Pencil className="h-3 w-3" />
-                        编辑活动
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setBroadcastEventId(evt.id)
-                          setBroadcastTitle(`关于活动《${evt.title}》的通知`)
-                          setBroadcastContent("")
-                          setBroadcastMsg("")
-                        }}
-                        className="flex h-8 items-center gap-1 px-3 text-[11px] font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
-                      >
-                        <Megaphone className="h-3 w-3" />
-                        群发消息
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger
-                          render={
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8 text-muted-foreground/80 hover:border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          }
-                        />
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>确认删除此活动吗?</AlertDialogTitle>
-                            <AlertDialogDescription>此操作无法撤销，所有已订票将同步失效。</AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>取消</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDeleteEvent(evt.id)}>
-                              确认
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </div>
-                ))}
-                {createdEvents.length === 0 && (
-                  <p className="py-8 text-center text-xs text-muted-foreground/80">
-                    目前未发布任何活动
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
         </div>
       )}
 
@@ -1148,6 +917,284 @@ export default function DashboardPage() {
                     <p className="text-xs text-muted-foreground text-center py-4">暂无最新发布活动</p>
                   )}
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {(user.role === "ORGANIZER" || user.role === "ADMIN") && (
+        <div className="space-y-6">
+          <DashboardAnalytics
+            events={createdEvents as unknown as EventData[]}
+            tickets={dashboardTickets}
+          />
+
+          <div className="grid gap-8 lg:grid-cols-12 mt-6">
+            {/* 左侧：发布与编辑表单 */}
+            <div id="event-form-panel" className="lg:col-span-5 rounded-2xl border border-border bg-card p-6 shadow-xs h-fit">
+              <h2 className="text-base font-bold text-foreground mb-4 flex items-center gap-1.5">
+                {editingEventId ? <Pencil className="size-4 shrink-0 text-brand" /> : <Megaphone className="size-4 shrink-0 text-brand" />}
+                <span>{editingEventId ? "编辑活动信息" : "发布全新校园活动"}</span>
+              </h2>
+              <form onSubmit={handleCreateOrUpdateEvent} className="space-y-4">
+                <FieldGroup className="space-y-3">
+                  <Field>
+                    <FieldLabel>活动名称</FieldLabel>
+                    <Input
+                      type="text"
+                      placeholder="输入活动主题..."
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      required
+                      className="bg-background text-foreground"
+                    />
+                  </Field>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field>
+                      <FieldLabel>活动类别</FieldLabel>
+                      <Select value={category} onValueChange={(val) => setCategory(val || "")}>
+                        <SelectTrigger className="bg-background text-foreground">
+                          <SelectValue placeholder="选择分类" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-lg border border-border bg-popover shadow-md">
+                          <SelectGroup>
+                            {(dbCategories.length > 0 ? dbCategories : [
+                              { label: "学术讲座", value: "学术讲座" },
+                              { label: "文体比赛", value: "文体比赛" },
+                              { label: "社团活动", value: "社团活动" },
+                            ]).map((cat) => (
+                              <SelectItem key={cat.value} value={cat.value}>
+                                {cat.label}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </Field>
+
+                    <Field>
+                      <FieldLabel>人数上限容量</FieldLabel>
+                      <Input
+                        type="number"
+                        min="1"
+                        placeholder="e.g. 100"
+                        value={capacity}
+                        onChange={(e) => setCapacity(e.target.value)}
+                        required
+                        className="bg-background text-foreground"
+                      />
+                    </Field>
+                  </div>
+
+                  <Field>
+                    <FieldLabel>举办地点</FieldLabel>
+                    <Input
+                      type="text"
+                      placeholder="e.g. 大礼堂 / 线上腾讯会议..."
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      required
+                      className="bg-background text-foreground"
+                    />
+                  </Field>
+
+                  <Field>
+                    <FieldLabel>开始时间 (24小时制)</FieldLabel>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Popover>
+                        <PopoverTrigger
+                          className={cn(
+                            "flex h-9 cursor-pointer items-center justify-start gap-1.5 rounded-lg border border-border bg-background py-2 pr-2.5 pl-3 text-left text-xs text-muted-foreground outline-hidden transition-colors select-none hover:bg-muted",
+                            !selectedDate && "text-muted-foreground/80"
+                          )}
+                        >
+                          <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground/85" />
+                          {selectedDate ? (
+                            format(selectedDate, "yyyy-MM-dd")
+                          ) : (
+                            "选择活动日期"
+                          )}
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="w-auto rounded-lg border border-border bg-popover p-0 shadow-md"
+                          align="start"
+                        >
+                          <Calendar
+                            mode="single"
+                            selected={selectedDate}
+                            onSelect={handleDateSelect}
+                            locale={zhCN}
+                            className="bg-popover text-foreground"
+                          />
+                        </PopoverContent>
+                      </Popover>
+
+                      <Select value={selectedHour} onValueChange={handleHourChange}>
+                        <SelectTrigger className="h-9 w-16 bg-background text-xs text-foreground">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-48 rounded-lg border border-border bg-popover shadow-md">
+                          {Array.from({ length: 24 }).map((_, i) => {
+                            const h = String(i).padStart(2, "0")
+                            return (
+                              <SelectItem key={h} value={h}>
+                                {h} 时
+                              </SelectItem>
+                            )
+                          })}
+                        </SelectContent>
+                      </Select>
+
+                      <Select value={selectedMinute} onValueChange={handleMinuteChange}>
+                        <SelectTrigger className="h-9 w-16 bg-background text-xs text-foreground">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-48 rounded-lg border border-border bg-popover shadow-md">
+                          {Array.from({ length: 60 }).map((_, i) => {
+                            const m = String(i).padStart(2, "0")
+                            return (
+                              <SelectItem key={m} value={m}>
+                                {m} 分
+                              </SelectItem>
+                            )
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </Field>
+
+                  <Field>
+                    <FieldLabel>活动宣传海报 (可选)</FieldLabel>
+                    <FileUploader
+                      value={uploadedFiles}
+                      onChange={setUploadedFiles}
+                      onUpload={handleImageUpload}
+                      maxCount={1}
+                      maxSize={2}
+                      multiple={false}
+                      accept="image/*"
+                      className="border-dashed"
+                    />
+                  </Field>
+
+                  <Field>
+                    <FieldLabel>活动详细描述</FieldLabel>
+                    <Textarea
+                      placeholder="输入活动详情、流程安排、注意事项等..."
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      rows={4}
+                      className="bg-background text-foreground"
+                    />
+                  </Field>
+
+                  {eventMsg && (
+                    <p className="text-xs font-semibold text-destructive flex items-center gap-1">
+                      <AlertCircle className="size-3.5 shrink-0" />
+                      <span>{eventMsg}</span>
+                    </p>
+                  )}
+
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      type="submit"
+                      className="h-10 flex-1 cursor-pointer font-bold bg-brand text-brand-foreground hover:bg-brand/90"
+                      disabled={!selectedDate || eventMsg === "活动开始时间不能早于当前时间"}
+                    >
+                      {!editingEventId && <Plus className="inline-start shrink-0 mr-1.5 h-4 w-4" />}
+                      {editingEventId ? "保存修改" : "确认发布活动"}
+                    </Button>
+                    {editingEventId && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleCancelEdit}
+                        className="h-10 cursor-pointer font-semibold"
+                      >
+                        取消编辑
+                      </Button>
+                    )}
+                  </div>
+                </FieldGroup>
+              </form>
+            </div>
+
+            {/* 右侧：活动管理列表 */}
+            <div className="lg:col-span-7 rounded-2xl border border-border bg-card p-6 shadow-xs flex flex-col min-h-125">
+              <h2 className="text-base font-bold text-foreground mb-4 flex items-center gap-1.5">
+                <CalendarIcon className="size-4 shrink-0 text-brand" />
+                <span>活动管理列表</span>
+              </h2>
+              <div className="divide-y divide-border flex-1">
+                {createdEvents.map((evt) => (
+                  <div key={evt.id} className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+                    <div>
+                      <h3 className="text-sm font-bold text-foreground/90">{evt.title}</h3>
+                      <p className="mt-1 text-[11px] text-muted-foreground/80">
+                        地点: {evt.location} | 容量: {evt.capacity} 人 | 已售: {evt.bookedCount} 张
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleStartEdit(evt)}
+                        className="flex h-8 items-center gap-1 px-3 text-[11px] font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
+                      >
+                        <Pencil className="h-3 w-3" />
+                        编辑活动
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setBroadcastEventId(evt.id)
+                          setBroadcastTitle(`关于活动《${evt.title}》的通知`)
+                          setBroadcastContent("")
+                          setBroadcastMsg("")
+                        }}
+                        className="flex h-8 items-center gap-1 px-3 text-[11px] font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
+                      >
+                        <Megaphone className="h-3 w-3" />
+                        群发消息
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger
+                          render={
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground/80 hover:border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>确认删除此活动吗?</AlertDialogTitle>
+                            <AlertDialogDescription>此操作无法撤销，所有已订票将同步失效。</AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>取消</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDeleteEvent(evt.id)}>
+                              确认
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
+                ))}
+                {createdEvents.length === 0 && (
+                  <p className="py-8 text-center text-xs text-muted-foreground/80">
+                    目前未发布任何活动
+                  </p>
+                )}
               </div>
             </div>
           </div>
