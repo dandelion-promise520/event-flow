@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { LogOut, Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { usePathname } from "next/navigation"
 
 import NotificationCenter from "./notification-center"
 
@@ -49,6 +50,7 @@ function ModeToggle() {
 }
 
 export default function Navbar() {
+  const pathname = usePathname()
   const [user, setUser] = useState<{ name: string; role: string } | null>(null)
 
   useEffect(() => {
@@ -66,6 +68,10 @@ export default function Navbar() {
     window.location.href = "/"
   }
 
+  if (pathname === "/login") {
+    return null
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
@@ -73,7 +79,7 @@ export default function Navbar() {
           href="/"
           className="flex items-center gap-2 text-lg font-bold text-foreground"
         >
-          <span>EventFlow</span>
+          <span>校园活动票务</span>
         </Link>
         <nav className="flex items-center gap-6">
           <ModeToggle />

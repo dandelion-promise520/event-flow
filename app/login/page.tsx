@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,10 +15,23 @@ import {
 } from "@/components/ui/card";
 
 export default function Login() {
+  const router = useRouter();
   const [email, setEmail] = useState<string>("student@campus.com");
   const [password, setPassword] = useState<string>("admin123");
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
+  const [checkingAuth, setCheckingAuth] = useState<boolean>(true);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("campus_user");
+    if (stored) {
+      router.replace("/dashboard");
+    } else {
+      setTimeout(() => {
+        setCheckingAuth(false);
+      }, 0);
+    }
+  }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,8 +58,16 @@ export default function Login() {
     }
   };
 
+  if (checkingAuth) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="animate-spin text-brand size-8" />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-[calc(100vh-64px)] items-center justify-center px-6 py-12">
+    <div className="flex min-h-screen items-center justify-center px-6 py-12">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-center text-xl font-bold">系统登录</CardTitle>
