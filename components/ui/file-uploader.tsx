@@ -253,66 +253,132 @@ export function FileUploader({
       )}
 
       {value.length > 0 && (
-        <ul className="space-y-2">
-          {value.map((file) => (
-            <li
-              key={file.id}
-              className="flex items-center justify-between p-3 border rounded-lg bg-card text-card-foreground text-sm hover:shadow-sm transition-all"
-            >
-              <div className="flex items-center space-x-3 overflow-hidden mr-2 flex-1">
-                {/* 缩略图预览 */}
-                <div className="h-10 w-10 rounded-lg bg-muted border overflow-hidden shrink-0 flex items-center justify-center relative">
-                  {file.type.startsWith("image/") && file.url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={file.url}
-                      alt={file.name}
-                      className="h-full w-full object-cover transition-transform duration-300 hover:scale-110"
-                    />
-                  ) : (
-                    <FileText className="h-5 w-5 text-muted-foreground" />
-                  )}
-                </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="font-medium truncate text-foreground">{file.name}</span>
-                  <span className="text-xs text-muted-foreground">{formatBytes(file.size)}</span>
-                  
-                  {file.status === "uploading" && (
-                    <div className="w-full bg-muted rounded-full h-1 mt-1.5 overflow-hidden">
-                      <div
-                        className="bg-primary h-1 rounded-full transition-all duration-300"
-                        style={{ width: `${file.progress || 0}%` }}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
+        <div className="w-full">
+          {maxCount === 1 && value[0].type?.startsWith("image/") && value[0].url ? (
+            <div className="relative group rounded-xl border border-border overflow-hidden bg-muted/20 dark:bg-muted/5 flex items-center justify-center p-2 max-w-sm w-full mx-auto min-h-[160px] max-h-[260px]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={value[0].url}
+                alt={value[0].name}
+                className={cn(
+                  "max-w-full max-h-[240px] rounded-lg object-contain transition-transform duration-300",
+                  value[0].status === "uploading" ? "blur-xs opacity-50" : "group-hover:scale-[1.02]"
+                )}
+              />
 
-              <div className="flex items-center space-x-2 shrink-0">
-                {file.status === "uploading" && (
-                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                )}
-                {file.status === "success" && (
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                )}
-                {file.status === "error" && (
-                  <span title={file.error}>
-                    <AlertCircle className="h-4 w-4 text-destructive" />
+              {value[0].status === "uploading" ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-background/40">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary mb-2" />
+                  <div className="w-24 bg-muted rounded-full h-1 overflow-hidden">
+                    <div
+                      className="bg-primary h-1 rounded-full transition-all duration-300"
+                      style={{ width: `${value[0].progress || 0}%` }}
+                    />
+                  </div>
+                  <span className="text-xs text-muted-foreground mt-1.5 font-medium">
+                    正在上传 {value[0].progress || 0}%
                   </span>
-                )}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                  onClick={() => handleRemove(file.id)}
+                </div>
+              ) : value[0].status === "error" ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-4 bg-destructive/10 rounded-xl">
+                  <AlertCircle className="h-6 w-6 text-destructive mb-1" />
+                  <span className="text-xs text-destructive font-medium text-center truncate w-full px-2" title={value[0].error}>
+                    {value[0].error || "上传失败"}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-[10px] mt-2 text-muted-foreground hover:text-foreground cursor-pointer"
+                    onClick={() => handleRemove(value[0].id)}
+                  >
+                    移除并重试
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center rounded-xl">
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="h-8 px-3 font-semibold text-xs cursor-pointer shadow-md rounded-lg"
+                      onClick={() => handleRemove(value[0].id)}
+                    >
+                      <X className="mr-1.5 h-3.5 w-3.5" />
+                      移除海报
+                    </Button>
+                  </div>
+                  <div className="absolute bottom-2 left-2 right-2 bg-black/60 rounded-md p-1.5 text-white text-[10px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 truncate max-w-[calc(100%-16px)]">
+                    <span>{value[0].name}</span>
+                    {value[0].size > 0 && <span className="ml-2 opacity-80">({formatBytes(value[0].size)})</span>}
+                  </div>
+                </>
+              )}
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {value.map((file) => (
+                <li
+                  key={file.id}
+                  className="flex items-center justify-between p-3 border rounded-lg bg-card text-card-foreground text-sm hover:shadow-sm transition-all"
                 >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
+                  <div className="flex items-center space-x-3 overflow-hidden mr-2 flex-1">
+                    {/* 缩略图预览 */}
+                    <div className="h-10 w-10 rounded-lg bg-muted border overflow-hidden shrink-0 flex items-center justify-center relative">
+                      {file.type.startsWith("image/") && file.url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={file.url}
+                          alt={file.name}
+                          className="h-full w-full object-cover transition-transform duration-300 hover:scale-110"
+                        />
+                      ) : (
+                        <FileText className="h-5 w-5 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <span className="font-medium truncate text-foreground">{file.name}</span>
+                      <span className="text-xs text-muted-foreground">{formatBytes(file.size)}</span>
+
+                      {file.status === "uploading" && (
+                        <div className="w-full bg-muted rounded-full h-1 mt-1.5 overflow-hidden">
+                          <div
+                            className="bg-primary h-1 rounded-full transition-all duration-300"
+                            style={{ width: `${file.progress || 0}%` }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2 shrink-0">
+                    {file.status === "uploading" && (
+                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    )}
+                    {file.status === "success" && (
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    )}
+                    {file.status === "error" && (
+                      <span title={file.error}>
+                        <AlertCircle className="h-4 w-4 text-destructive" />
+                      </span>
+                    )}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                      onClick={() => handleRemove(file.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       )}
     </div>
   )
