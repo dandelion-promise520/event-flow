@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertTitle, AlertDescription, AlertAction } from "@/components/ui/alert"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 interface User {
   id: string
@@ -30,10 +31,18 @@ export default function CheckinPage() {
 
   useEffect(() => {
     const stored = localStorage.getItem("campus_user")
-    if (stored) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setUser(JSON.parse(stored))
+    if (!stored) {
+      window.location.href = "/login"
+      return
     }
+    const curr = JSON.parse(stored)
+    if (curr.role !== "ORGANIZER" && curr.role !== "ADMIN") {
+      toast.error("您没有权限访问此页面！")
+      window.location.href = "/dashboard"
+      return
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setUser(curr)
     setLoading(false)
   }, [])
 

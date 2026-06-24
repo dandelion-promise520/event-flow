@@ -22,6 +22,7 @@ import { format } from "date-fns"
 import { zhCN } from "date-fns/locale"
 import { cn, isTicketWithinDateRange } from "@/lib/utils"
 import { DateRange } from "react-day-picker"
+import { toast } from "sonner"
 
 interface User {
   id: string
@@ -68,12 +69,19 @@ export default function TicketsReportPage() {
 
   useEffect(() => {
     const stored = localStorage.getItem("campus_user")
-    if (stored) {
-      const curr = JSON.parse(stored)
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setUser(curr)
-      loadTicketsData(curr)
+    if (!stored) {
+      window.location.href = "/login"
+      return
     }
+    const curr = JSON.parse(stored)
+    if (curr.role !== "ORGANIZER" && curr.role !== "ADMIN") {
+      toast.error("您没有权限访问此页面！")
+      window.location.href = "/dashboard"
+      return
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setUser(curr)
+    loadTicketsData(curr)
   }, [])
 
   const filteredTickets = dashboardTickets.filter((t) => {

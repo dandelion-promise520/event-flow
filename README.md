@@ -67,31 +67,52 @@
 
 ---
 
-## 🚀 快速开始
+## 🚀 快速开始与部署指南
 
-### 1. 克隆并安装依赖
+### 1. 运行环境版本要求
 
-在项目根目录下执行：
+为确保项目异地部署无环境冲突，请严格按照以下软件版本进行配置：
 
+| 软件/环境组件 | 推荐版本 | 最低版本要求 | 作用描述 |
+| :--- | :--- | :--- | :--- |
+| **Node.js** | `v20.11.0 (LTS)` | `v18.17.0` | 前后端运行期引擎，不建议使用 v22 及以上最新测试版 |
+| **包管理器** | `pnpm v9.x` | `pnpm v8.x` | 依赖关系管理器，规避 npm 带来的幽灵依赖和版本不一致问题 |
+| **数据库** | `SQLite 3` | 本地集成 | 项目内置轻量级数据库，无需单独配置 MySQL 软件，开箱即用 |
+| **现代浏览器** | Chrome 120+ | Edge / Safari | 需支持 ES6 及 CSS 容器查询、Tailwind v4 特效 |
+
+---
+
+### 2. 分步安装与部署流程
+
+#### **步骤一：安装依赖与生成 DB 客户端**
+进入项目根目录，在终端（PowerShell 或 Bash）中执行：
 ```bash
 pnpm install
 ```
+*提示：安装完成后，系统会自动运行 `postinstall` 挂钩，调用 `prisma generate` 编译生成专属于本项目的数据库类型化客户端。*
 
-此时会自动触发 `postinstall` 钩子生成项目的 Prisma 客户端（无需手动配置 `.env`，项目已内置该配置文件）。
-
-### 2. 启动开发服务器
-
-执行以下命令：
-
+#### **步骤二：初始化本地数据库**
+系统内置了智能初始化脚本。直接运行以下开发启动命令：
 ```bash
 pnpm dev
 ```
+- **工作原理**：启动时，项目会自动检测 `prisma/dev.db` 文件是否存在。如果不存在，会自动在后台静默执行 `npx prisma db push --accept-data-loss`（同步表结构）和 `npx prisma db seed`（写入测试用户、活动及预订数据）。
+- **手动重新初始化方法**（如数据混乱需要清空重置）：
+  ```bash
+  # 1. 删除 prisma 目录下的 dev.db 文件
+  # 2. 在根目录执行：
+  npx prisma db push --accept-data-loss
+  npx prisma db seed
+  ```
 
-> 💡 **提示**：首次启动开发服务器时，项目会自动检测并为您初始化 SQLite 数据库文件（`prisma/dev.db`）并填充预置的测试数据。再次启动时将自动跳过该过程。
+#### **步骤三：访问系统**
+控制台提示 `Ready in xxxms` 后，打开浏览器访问：
+- 前台首页：[http://localhost:3000](http://localhost:3000)
+- 登录页面：[http://localhost:3000/login](http://localhost:3000/login)
 
-打开浏览器访问 [http://localhost:3000](http://localhost:3000)。
+---
 
-### 5. 默认测试账户
+### 3. 默认测试账户
 
 系统预置了不同角色的测试账户以供快速体验（密码均为 `admin123`）：
 
@@ -108,45 +129,67 @@ pnpm dev
 
 ---
 
-## 🛠️ 开发与测试指南
-
-### 添加 UI 组件 (shadcn/ui)
-
-如需添加新的组件，请运行：
+### 4. 常见开发维护命令
 
 ```bash
-npx shadcn@latest add <组件名称>
-```
-例如：
-```bash
-npx shadcn@latest add button
-```
-
-在代码中引入并使用：
-```tsx
-import { Button } from "@/components/ui/button";
-```
-
-### 运行自动化测试
-
-本项目使用 Node.js 原生的测试套件对核心功能 API 进行测试。执行以下命令运行测试：
-
-```bash
+# 1. 运行自动化 API 集成测试套件
 pnpm test
-```
 
-### 类型检查
-
-```bash
+# 2. TypeScript 类型静态检查
 pnpm typecheck
-```
 
-### 代码格式化与 Lint 检查
-
-```bash
-# 格式化代码
+# 3. 自动格式化项目代码风格
 pnpm format
 
-# Lint 校验
+# 4. 执行静态代码分析与 ESLint 规范校验
 pnpm lint
+
+# 5. 构建生产环境压缩包
+pnpm build
+
+# 6. 运行生产环境编译服务
+pnpm start
 ```
+
+---
+
+## ❓ 常见部署报错 Q&A (至少3条)
+
+### **Q1: 运行 `pnpm install` 安装依赖时，better-sqlite3 或 node-gyp 模块报错，提示缺少 C++ 编译环境或 python 路径错误。**
+- **原因分析**：`better-sqlite3` 包含部分 C++ 编写的原生底层驱动。在异地部署时，如果目标计算机的 Node.js 架构与编译预构建包不匹配，pnpm 会尝试在本地进行源码编译，而本地缺乏 Visual Studio Build Tools 或 Python 环境时会导致编译挂科。
+- **解决方案**：
+  1. 强烈建议安装 Node.js LTS 版本（如 `v20.x`），其自带的二进制包覆盖率最广。
+  2. 若报错依然存在且不影响正常运行，可使用命令绕过编译测试：`pnpm install --ignore-scripts`
+  3. 或者，在 Windows 控制台（以管理员运行）下安装编译工具链：`npm install --global windows-build-tools`
+
+### **Q2: 登录系统时提示 500 错误，或者在控制台看到 `PrismaClientInitializationError: Can't open the database file`**
+- **原因分析**：项目底层使用本地 SQLite 数据库。Prisma 引擎在运行时无法在项目目录的 `/prisma/dev.db` 处读取或创建数据库文件。这通常是由于当前执行启动命令的终端工作目录（Cwd）不在项目的根目录下，或者相应的数据库文件权限不足导致的。
+- **解决方案**：
+  1. 请确保你在项目根目录（即包含 `package.json` 的目录）下执行 `pnpm dev`。
+  2. 检查 `/[project-root]/.env` 中的 `DATABASE_URL` 是否被修改。必须保持为 `"file:./prisma/dev.db"` 相对路径。
+  3. 确认 `prisma` 目录具有完整的读写权限。
+
+### **Q3: 登录默认的测试账号（如 `admin@campus.com`）时，界面提示“密码错误”或“用户不存在”。**
+- **原因分析**：本地 SQLite 数据库文件虽已生成，但未正确写入种子测试数据，导致 `User` 表中为空。
+- **解决方案**：
+  1. 直接删除 `prisma/dev.db` 数据库文件。
+  2. 在项目根目录下打开命令行，手动执行结构同步与种子填充命令：
+     ```bash
+     npx prisma db push --accept-data-loss
+     npx prisma db seed
+     ```
+  3. 控制台打印 `种子用户数据创建成功!` 等字样后，重新登录尝试。
+
+### **Q4: 端口 3000 被占用，启动失败报错 `Error: listen EADDRINUSE: address already in use :::3000`**
+- **原因分析**：本地计算机上已有其他开发项目（如其他 Next.js、React 或 Node 服务）占用了系统 3000 默认端口。
+- **解决方案**：
+  1. 在 `pnpm dev` 时指定其他空闲端口，例如使用 3001 端口：
+     ```bash
+     pnpm dev --port 3001
+     ```
+  2. 或者是关闭占用 3000 端口的进程。在 Windows cmd 中执行：
+     ```cmd
+     netstat -aon | findstr "3000"
+     # 找到对应的 PID（最后一列的数字），例如 1234
+     taskkill /F /PID 1234
+     ```

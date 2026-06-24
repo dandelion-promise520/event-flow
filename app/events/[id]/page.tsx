@@ -158,9 +158,9 @@ export default function EventDetail({ params }: PageProps) {
               </p>
             </div>
 
-            <div className="flex flex-col gap-2 min-w-[200px]">
+             <div className="flex flex-col gap-2 min-w-[200px]">
               {success ? (
-                <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 border-transparent font-bold py-1.5 px-3">
+                <Badge variant="secondary" className="bg-brand/10 text-brand border-transparent font-bold py-1.5 px-3">
                   <CheckCircle2 className="size-4" />
                   预约成功
                 </Badge>
@@ -177,7 +177,7 @@ export default function EventDetail({ params }: PageProps) {
                 </Button>
               )}
               {message && (
-                <p className={cn("text-xs mt-2", success ? "text-emerald-600 dark:text-emerald-400" : "text-destructive")}>
+                <p className={cn("text-xs mt-2", success ? "text-brand" : "text-destructive")}>
                   {message}
                 </p>
               )}

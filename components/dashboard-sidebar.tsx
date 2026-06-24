@@ -74,13 +74,13 @@ export default function DashboardSidebar() {
       title: "现场核销",
       href: "/dashboard/checkin",
       icon: CheckSquare,
-      roles: ["ORGANIZER"],
+      roles: ["ORGANIZER", "ADMIN"],
     },
     {
       title: "核销明细",
       href: "/dashboard/tickets",
       icon: ClipboardList,
-      roles: ["ORGANIZER"],
+      roles: ["ORGANIZER", "ADMIN"],
     },
     // 管理员专属项
     {
