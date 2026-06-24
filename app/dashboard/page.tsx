@@ -38,6 +38,7 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { FieldGroup, Field, FieldLabel } from "@/components/ui/field"
 import { Calendar } from "@/components/ui/calendar"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Popover,
   PopoverContent,
@@ -537,30 +538,12 @@ export default function DashboardPage() {
           </p>
         </div>
         {user.role === "ADMIN" && (
-          <div className="inline-flex h-9 items-center gap-1 rounded-full bg-muted/60 p-1 border border-border/40 select-none">
-            <button
-              onClick={() => setActiveTab("stats")}
-              className={cn(
-                "rounded-full px-4 py-1 text-xs font-bold transition-all duration-200 cursor-pointer",
-                activeTab === "stats"
-                  ? "bg-card text-brand shadow-xs border border-border/20"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              系统统计大盘
-            </button>
-            <button
-              onClick={() => setActiveTab("events")}
-              className={cn(
-                "rounded-full px-4 py-1 text-xs font-bold transition-all duration-200 cursor-pointer",
-                activeTab === "events"
-                  ? "bg-card text-brand shadow-xs border border-border/20"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              活动发布与管理
-            </button>
-          </div>
+          <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val)}>
+            <TabsList>
+              <TabsTrigger value="stats" className="cursor-pointer">系统统计大盘</TabsTrigger>
+              <TabsTrigger value="events" className="cursor-pointer">活动发布与管理</TabsTrigger>
+            </TabsList>
+          </Tabs>
         )}
       </div>
 
