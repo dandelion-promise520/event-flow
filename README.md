@@ -2,6 +2,8 @@
 
 这是一个基于 **Next.js 16 (App Router)**、**React 19** 和 **TypeScript 6.0.3** 构建的全栈活动与票务管理系统模板。项目深度集成了 **Prisma ORM**、**SQLite** 以及 **shadcn/ui** 与 **Tailwind CSS v4**。
 
+同时，项目集成了符合 **OpenAPI 3.0** 规范的 **Swagger UI** 交互式 API 文档，为开发者提供开箱即用的接口测试与集成能力。
+
 ---
 
 ## 🌟 核心特性
@@ -9,6 +11,7 @@
 - 🔐 **用户认证与角色管理**：支持用户注册、登录，并划分 `USER` (普通用户)、`ORGANIZER` (组织者) 与 `ADMIN` (管理员) 角色。
 - 📅 **活动管理**：支持活动的创建、编辑、分类及状态管理（包含票务容量与价格）。
 - 🎟️ **票务系统**：支持用户在线订票、生成唯一票码（Ticket Code）以及票务核销（Check-in）流程。
+- 📖 **交互式 API 文档**：内置 Swagger UI 接口文档（访问 `/api-doc`），基于路由 JSDoc 自动扫描生成。
 - 🎨 **现代化 UI 设计**：集成 Tailwind CSS v4 及 shadcn/ui，支持响应式布局。
 - 🧪 **自动化测试**：预配置了基于 Node.js 原生测试运行器（Test Runner）的单元与集成测试，覆盖认证、活动与票务核心 API。
 
@@ -22,6 +25,7 @@
 | **语言** | TypeScript 6.0.3 |
 | **数据库/ORM** | Prisma 7.8 (SQLite 数据库) |
 | **样式/组件库** | Tailwind CSS v4 & shadcn/ui |
+| **API 文档工具** | `next-swagger-doc` & `swagger-ui-react` (OpenAPI 3.0) |
 | **测试框架** | Node.js Test Runner & `tsx` |
 | **工具库** | `bcryptjs`, `lucide-react`, `next-themes` |
 
@@ -32,6 +36,11 @@
 ```text
 ├── app/                  # Next.js App Router 页面及 API 路由
 │   ├── api/              # API 端点 (认证、活动管理、票务核销等)
+│   │   ├── doc/          # Swagger JSON 规范数据接口 (/api/doc)
+│   │   └── ...           # 其它业务 API
+│   ├── api-doc/          # Swagger UI 文档渲染页面 (/api-doc)
+│   │   ├── react-swagger.tsx # 客户端 SwaggerUI 组件包装器
+│   │   └── page.tsx      # 文档页面入口 (服务端组件)
 │   ├── dashboard/        # 用户控制台页面
 │   ├── events/           # 活动详情与预订页面
 │   ├── login/            # 登录与注册页面
@@ -41,6 +50,8 @@
 │   └── ui/               # shadcn/ui 基础组件
 ├── hooks/                # 自定义 React Hooks
 ├── lib/                  # 公共工具库 (数据库连接、Prisma 客户端实例等)
+│   ├── swagger.ts        # Swagger 配置文件与 Spec 生成器
+│   └── ...
 ├── prisma/               # Prisma 配置及数据库文件
 │   ├── dev.db            # SQLite 数据库文件 (本地)
 │   ├── schema.prisma     # 数据库架构模型文件
@@ -51,9 +62,52 @@
 
 ---
 
+## 📖 API 接口文档 (Swagger)
+
+项目集成了 Swagger 交互式文档，以便开发人员进行接口查看和模拟请求：
+
+### 1. 访问方式
+在本地开发服务运行（`pnpm dev`）后，通过浏览器访问：
+- **可视化 UI 页面**：[http://localhost:3000/api-doc](http://localhost:3000/api-doc)
+- **JSON 规范数据**：[http://localhost:3000/api/doc](http://localhost:3000/api/doc)（可直接导入 Postman/Apifox）
+
+### 2. 文档编写与更新机制
+本项目的 API 文档采用 **注释即文档** 的声明式设计。在 `app/api` 下的各个路由文件 `route.ts` 中，只需在导出函数上方添加 `@swagger` 格式的 JSDoc 注释，即可被 `next-swagger-doc` 自动捕获：
+
+```typescript
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: 示例登录接口
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: 登录成功
+ */
+export async function POST(req: Request) { ... }
+```
+
+---
+
 ## 💾 数据库模型 (Prisma Schema)
 
-项目在 [schema.prisma](file:///D:/Desktop/javaweb/next-app/prisma/schema.prisma) 中定义了以下核心模型：
+项目在 [schema.prisma](file:///D:/Desktop/javaweb/event-flow/prisma/schema.prisma) 中定义了以下核心模型：
 
 1. **User (用户)**：
    - 角色：`USER`、`ORGANIZER`、`ADMIN`
@@ -116,7 +170,7 @@ pnpm install
 ```bash
 pnpm dev
 ```
-- **工作原理**：启动时，项目会自动检测 `prisma/dev.db` 文件是否存在。如果不存在，会自动在后台静默执行 `npx prisma db push --accept-data-loss`（同步表结构）和 `npx prisma db seed`（写入测试用户、活动及预订数据）。
+- **工作原理**：启动时，项目会自动检测 `prisma/dev.db` 文件是否存在。如果不存在，会自动在后台静默执行 `npx prisma db push --accept-data-loss`（同步表结构） and `npx prisma db seed`（写入测试用户、活动及预订数据）。
 - **手动重新初始化方法**（如数据混乱需要清空重置）：
   ```bash
   # 1. 删除 prisma 目录下的 dev.db 文件
@@ -154,7 +208,7 @@ pnpm dev
 ```bash
 # 1. 运行自动化 API 集成测试套件
 pnpm test
-
+ 
 # 2. TypeScript 类型静态检查
 pnpm typecheck
 

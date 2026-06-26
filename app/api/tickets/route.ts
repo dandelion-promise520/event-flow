@@ -1,3 +1,73 @@
+/**
+ * @swagger
+ * /api/tickets:
+ *   get:
+ *     summary: 获取门票列表
+ *     description: 根据用户 ID 或活动 ID 查询门票信息
+ *     tags:
+ *       - Tickets
+ *     parameters:
+ *       - in: query
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         description: 用户 ID
+ *       - in: query
+ *         name: eventId
+ *         schema:
+ *           type: string
+ *         description: 活动 ID
+ *     responses:
+ *       200:
+ *         description: 成功获取门票列表
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       500:
+ *         description: 服务器错误
+ *   post:
+ *     summary: 活动报名/购买门票
+ *     description: 用户报名特定活动，生成电子核销码并向用户发送通知
+ *     tags:
+ *       - Tickets
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *               - eventId
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: 用户 ID
+ *               eventId:
+ *                 type: string
+ *                 description: 活动 ID
+ *     responses:
+ *       200:
+ *         description: 报名成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 ticket:
+ *                   type: object
+ *       400:
+ *         description: 参数缺失或活动名额已满或已经报名过
+ *       404:
+ *         description: 活动未找到
+ *       500:
+ *         description: 服务器错误
+ */
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 

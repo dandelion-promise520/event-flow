@@ -1,3 +1,157 @@
+/**
+ * @swagger
+ * /api/categories:
+ *   get:
+ *     summary: 获取活动分类列表
+ *     description: 获取所有活动分类，按名称升序排序
+ *     tags:
+ *       - Categories
+ *     responses:
+ *       200:
+ *         description: 成功获取分类列表
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   name:
+ *                     type: string
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                   updatedAt:
+ *                     type: string
+ *                     format: date-time
+ *       500:
+ *         description: 服务器错误
+ *   post:
+ *     summary: 创建活动分类
+ *     description: 管理员创建新活动分类，包含重名校验
+ *     tags:
+ *       - Categories
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - adminId
+ *               - name
+ *             properties:
+ *               adminId:
+ *                 type: string
+ *                 description: 操作管理员的 ID（用于权限校验）
+ *               name:
+ *                 type: string
+ *                 description: 分类名称
+ *     responses:
+ *       200:
+ *         description: 创建成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 category:
+ *                   type: object
+ *       400:
+ *         description: 分类名称为空或该名称已存在
+ *       403:
+ *         description: 无权访问，仅限管理员
+ *       500:
+ *         description: 服务器错误
+ *   put:
+ *     summary: 修改活动分类
+ *     description: 管理员修改指定 ID 的分类名称
+ *     tags:
+ *       - Categories
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 分类 ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - adminId
+ *               - name
+ *             properties:
+ *               adminId:
+ *                 type: string
+ *                 description: 操作管理员的 ID（用于权限校验）
+ *               name:
+ *                 type: string
+ *                 description: 分类名称
+ *     responses:
+ *       200:
+ *         description: 修改成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 category:
+ *                   type: object
+ *       400:
+ *         description: 分类名称为空，参数缺失，或该名称已存在
+ *       403:
+ *         description: 无权访问，仅限管理员
+ *       500:
+ *         description: 服务器错误
+ *   delete:
+ *     summary: 删除活动分类
+ *     description: 管理员删除指定 ID 的分类。如果有关联的活动在使用此分类，则拒绝删除
+ *     tags:
+ *       - Categories
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 分类 ID
+ *       - in: query
+ *         name: adminId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 操作管理员的 ID（用于权限校验）
+ *     responses:
+ *       200:
+ *         description: 删除成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: 分类 ID 缺失，或有活动在使用该分类
+ *       403:
+ *         description: 无权访问，仅限管理员
+ *       404:
+ *         description: 分类不存在
+ *       500:
+ *         description: 服务器错误
+ */
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 

@@ -1,3 +1,233 @@
+/**
+ * @swagger
+ * /api/events:
+ *   get:
+ *     summary: 获取活动列表
+ *     description: 根据分类或组织者 ID 筛选活动，按创建时间降序排序
+ *     tags:
+ *       - Events
+ *     parameters:
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: 按活动分类名过滤
+ *       - in: query
+ *         name: organizerId
+ *         schema:
+ *           type: string
+ *         description: 按组织者（用户）ID 过滤
+ *     responses:
+ *       200:
+ *         description: 成功获取活动列表
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   title:
+ *                     type: string
+ *                   description:
+ *                     type: string
+ *                   coverUrl:
+ *                     type: string
+ *                   location:
+ *                     type: string
+ *                   startTime:
+ *                     type: string
+ *                     format: date-time
+ *                   endTime:
+ *                     type: string
+ *                     format: date-time
+ *                   capacity:
+ *                     type: integer
+ *                   price:
+ *                     type: number
+ *                   category:
+ *                     type: string
+ *                   organizerId:
+ *                     type: string
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                   updatedAt:
+ *                     type: string
+ *                     format: date-time
+ *                   bookedCount:
+ *                     type: integer
+ *                     description: 已报名的门票数量
+ *                   organizer:
+ *                     type: object
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *       500:
+ *         description: 服务器错误
+ *   post:
+ *     summary: 创建活动
+ *     description: 创建一个新活动，开始时间不能早于当前时间
+ *     tags:
+ *       - Events
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - location
+ *               - startTime
+ *               - endTime
+ *               - capacity
+ *               - category
+ *               - organizerId
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 description: 活动标题
+ *               description:
+ *                 type: string
+ *                 description: 活动描述
+ *               coverUrl:
+ *                 type: string
+ *                 description: 封面图片 URL
+ *               location:
+ *                 type: string
+ *                 description: 活动地点
+ *               startTime:
+ *                 type: string
+ *                 format: date-time
+ *                 description: 开始时间
+ *               endTime:
+ *                 type: string
+ *                 format: date-time
+ *                 description: 结束时间
+ *               capacity:
+ *                 type: integer
+ *                 description: 容纳人数上限
+ *               price:
+ *                 type: number
+ *                 description: 票价（可选，默认 0）
+ *               category:
+ *                 type: string
+ *                 description: 分类名称
+ *               organizerId:
+ *                 type: string
+ *                 description: 组织者 ID
+ *     responses:
+ *       200:
+ *         description: 活动创建成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 event:
+ *                   type: object
+ *       400:
+ *         description: 参数缺失或开始时间早于当前时间
+ *       500:
+ *         description: 服务器错误
+ *   put:
+ *     summary: 修改活动
+ *     description: 修改指定 ID 的活动信息，如果是修改开始时间，则新时间不能早于当前时间
+ *     tags:
+ *       - Events
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 活动 ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - location
+ *               - startTime
+ *               - endTime
+ *               - capacity
+ *               - category
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               coverUrl:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *               startTime:
+ *                 type: string
+ *                 format: date-time
+ *               endTime:
+ *                 type: string
+ *                 format: date-time
+ *               capacity:
+ *                 type: integer
+ *               price:
+ *                 type: number
+ *               category:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: 修改成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 event:
+ *                   type: object
+ *       400:
+ *         description: 参数缺失或开始时间早于当前时间
+ *       404:
+ *         description: 活动不存在
+ *       500:
+ *         description: 服务器错误
+ *   delete:
+ *     summary: 删除活动
+ *     description: 根据指定 ID 删除活动
+ *     tags:
+ *       - Events
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 活动 ID
+ *     responses:
+ *       200:
+ *         description: 删除成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: 参数缺失
+ *       500:
+ *         description: 服务器错误
+ */
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 

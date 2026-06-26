@@ -1,3 +1,51 @@
+/**
+ * @swagger
+ * /api/tickets/checkin:
+ *   post:
+ *     summary: 门票核销
+ *     description: 扫描门票核销码进行门票核销，更新状态为 USED 并发送核销成功通知
+ *     tags:
+ *       - Tickets
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - ticketCode
+ *             properties:
+ *               ticketCode:
+ *                 type: string
+ *                 description: 门票核销码
+ *     responses:
+ *       200:
+ *         description: 核销成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 detail:
+ *                   type: object
+ *                   properties:
+ *                     eventTitle:
+ *                       type: string
+ *                     userName:
+ *                       type: string
+ *                     checkinTime:
+ *                       type: string
+ *       400:
+ *         description: 门票核销码为空，或门票已被使用/被取消
+ *       404:
+ *         description: 找不到门票信息
+ *       500:
+ *         description: 服务器错误
+ */
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
